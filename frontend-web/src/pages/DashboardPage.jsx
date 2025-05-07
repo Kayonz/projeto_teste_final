@@ -2,10 +2,12 @@ import React from "react";
 import styled from "styled-components";
 
 const Container = styled.div`
-  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
   background-color: #eff0f9;
   padding: 40px;
   font-family: "Montserrat", sans-serif;
+  box-sizing: border-box;
 `;
 
 const Header = styled.div`
@@ -36,6 +38,7 @@ const Cards = styled.div`
   display: flex;
   gap: 24px;
   margin-top: 40px;
+  flex-wrap: wrap;
 `;
 
 const Card = styled.div`
@@ -44,6 +47,7 @@ const Card = styled.div`
   padding: 24px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   flex: 1;
+  min-width: 250px;
 `;
 
 const CardTitle = styled.h3`
@@ -57,8 +61,14 @@ const CardValue = styled.p`
   color: #1ab188;
 `;
 
-const AddButton = styled.button`
-  margin-top: 20px;
+const Actions = styled.div`
+  margin-top: 40px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+`;
+
+const ActionButton = styled.button`
   padding: 12px 24px;
   background-color: #25267e;
   color: white;
@@ -76,6 +86,14 @@ function DashboardPage() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     window.location.href = "/";
+  };
+
+  const handleAddGasto = () => {
+    alert("Abrir leitura do cupom (OCR)");
+  };
+
+  const handleSetOrcamento = () => {
+    alert("Abrir modal para definir orçamento mensal");
   };
 
   return (
@@ -97,7 +115,10 @@ function DashboardPage() {
         </Card>
       </Cards>
 
-      <AddButton>+ Adicionar Gasto</AddButton>
+      <Actions>
+        <ActionButton onClick={handleAddGasto}>+ Adicionar Gasto (Scan)</ActionButton>
+        <ActionButton onClick={handleSetOrcamento}>+ Definir Orçamento</ActionButton>
+      </Actions>
     </Container>
   );
 }
