@@ -3,44 +3,76 @@ import styled from "styled-components";
 
 const Container = styled.div`
   min-height: 100vh;
-  background-color: #1a1a2e;
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+  background-color: #eff0f9;
+  padding: 40px;
+  font-family: "Montserrat", sans-serif;
 `;
 
-const Card = styled.div`
-  background-color: #16213e;
-  padding: 40px;
-  border-radius: 10px;
-  text-align: center;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `;
 
 const Title = styled.h1`
-  margin-bottom: 20px;
+  color: #25267e;
 `;
 
 const LogoutButton = styled.button`
-  margin-top: 30px;
-  padding: 10px 20px;
   background-color: #e94560;
-  border: none;
-  border-radius: 6px;
   color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
   font-weight: bold;
   cursor: pointer;
 
   &:hover {
-    background-color: #ff4d6d;
+    background-color: #d0304d;
+  }
+`;
+
+const Cards = styled.div`
+  display: flex;
+  gap: 24px;
+  margin-top: 40px;
+`;
+
+const Card = styled.div`
+  background-color: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  flex: 1;
+`;
+
+const CardTitle = styled.h3`
+  color: #25267e;
+  margin-bottom: 10px;
+`;
+
+const CardValue = styled.p`
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1ab188;
+`;
+
+const AddButton = styled.button`
+  margin-top: 20px;
+  padding: 12px 24px;
+  background-color: #25267e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #1b1c6a;
   }
 `;
 
 function DashboardPage() {
-  const token = localStorage.getItem("token");
-
   const handleLogout = () => {
     localStorage.removeItem("token");
     window.location.href = "/";
@@ -48,17 +80,24 @@ function DashboardPage() {
 
   return (
     <Container>
-      <Card>
-        <Title>Dashboard</Title>
-        {token ? (
-          <>
-            <p>Bem-vindo ao seu controle financeiro!</p>
-            <LogoutButton onClick={handleLogout}>Sair</LogoutButton>
-          </>
-        ) : (
-          <p>Você não está logado.</p>
-        )}
-      </Card>
+      <Header>
+        <Title>Olá, bem-vindo(a)!</Title>
+        <LogoutButton onClick={handleLogout}>Sair</LogoutButton>
+      </Header>
+
+      <Cards>
+        <Card>
+          <CardTitle>Orçamento Atual</CardTitle>
+          <CardValue>R$ 5.000,00</CardValue>
+        </Card>
+
+        <Card>
+          <CardTitle>Gastos do mês</CardTitle>
+          <CardValue>R$ 2.350,00</CardValue>
+        </Card>
+      </Cards>
+
+      <AddButton>+ Adicionar Gasto</AddButton>
     </Container>
   );
 }
