@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import Sidebar from "../components/SideBar.jsx";
 
 const Container = styled.div`
   width: 100vw;
@@ -82,6 +83,8 @@ const ActionButton = styled.button`
   }
 `;
 
+
+
 function DashboardPage() {
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -96,31 +99,51 @@ function DashboardPage() {
     alert("Abrir modal para definir orçamento mensal");
   };
 
+  const [currentView, setCurrentView] = useState("dashboard");
+
+  const handleNavigation = (destino) => {
+    setCurrentView(destino);
+  };
+  
+
   return (
     <Container>
+      <Sidebar onNavigate={handleNavigation} onLogout={handleLogout} />
+  
       <Header>
         <Title>Olá, bem-vindo(a)!</Title>
         <LogoutButton onClick={handleLogout}>Sair</LogoutButton>
       </Header>
-
-      <Cards>
-        <Card>
-          <CardTitle>Orçamento Atual</CardTitle>
-          <CardValue>R$ 5.000,00</CardValue>
-        </Card>
-
-        <Card>
-          <CardTitle>Gastos do mês</CardTitle>
-          <CardValue>R$ 2.350,00</CardValue>
-        </Card>
-      </Cards>
-
-      <Actions>
-        <ActionButton onClick={handleAddGasto}>+ Adicionar Gasto (Scan)</ActionButton>
-        <ActionButton onClick={handleSetOrcamento}>+ Definir Orçamento</ActionButton>
-      </Actions>
+  
+      {currentView === "dashboard" && (
+        <>
+          <Cards>
+            <Card>
+              <CardTitle>Orçamento Atual</CardTitle>
+              <CardValue>R$ 5.000,00</CardValue>
+            </Card>
+  
+            <Card>
+              <CardTitle>Gastos do mês</CardTitle>
+              <CardValue>R$ 2.350,00</CardValue>
+            </Card>
+          </Cards>
+  
+          <Actions>
+            <ActionButton onClick={handleAddGasto}>+ Adicionar Gasto (Scan)</ActionButton>
+            <ActionButton onClick={handleSetOrcamento}>+ Definir Orçamento</ActionButton>
+          </Actions>
+        </>
+      )}
+  
+      {currentView === "gasto" && (
+        <h2>Formulário de Gasto</h2>
+      )}
+  
+      {currentView === "orcamento" && (
+        <h2>Formulário de Orçamento</h2>
+      )}
     </Container>
   );
 }
-
 export default DashboardPage;
