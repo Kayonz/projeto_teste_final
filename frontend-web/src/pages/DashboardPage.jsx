@@ -1,6 +1,6 @@
-import React from "react";
 import styled from "styled-components";
 import Sidebar from "../components/SideBar.jsx";
+import React, { useState } from "react";
 
 const Container = styled.div`
   width: 100vw;
