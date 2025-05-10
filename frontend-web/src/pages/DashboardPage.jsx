@@ -68,6 +68,13 @@ const Actions = styled.div`
   gap: 16px;
   flex-wrap: wrap;
 `;
+const ContentWrapper = styled.div`
+  margin-left: 220px; /* mesma largura da Sidebar */
+  padding: 40px;
+  transition: margin-left 0.3s ease;
+  background-color: #eff0f9;
+  min-height: 100vh;
+`;
 
 const ActionButton = styled.button`
   padding: 12px 24px;
@@ -109,7 +116,7 @@ function DashboardPage() {
   return (
     <Container>
       <Sidebar onNavigate={handleNavigation} onLogout={handleLogout} />
-  
+      <ContentWrapper>
       <Header>
         <Title>Olá, bem-vindo(a)!</Title>
         <LogoutButton onClick={handleLogout}>Sair</LogoutButton>
@@ -133,7 +140,9 @@ function DashboardPage() {
             <ActionButton onClick={handleAddGasto}>+ Adicionar Gasto (Scan)</ActionButton>
             <ActionButton onClick={handleSetOrcamento}>+ Definir Orçamento</ActionButton>
           </Actions>
+          
         </>
+        
       )}
   
       {currentView === "gasto" && (
@@ -143,6 +152,7 @@ function DashboardPage() {
       {currentView === "orcamento" && (
         <h2>Formulário de Orçamento</h2>
       )}
+      </ContentWrapper>
     </Container>
   );
 }
