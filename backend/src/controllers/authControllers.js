@@ -31,6 +31,25 @@ export const registerUser = async (req, res) => {
   }
 };
 
+
+
+const categoriasPadrao = [
+  "Alimentação",
+  "Transporte",
+  "Lazer",
+  "Moradia",
+  "Saúde",
+  "Educação",
+  "Outros"
+];
+
+for (const nome of categoriasPadrao) {
+  await pool.query(
+    "INSERT INTO categorias (usuario_id, nome, limite) VALUES ($1, $2, $3)",
+    [newUserId, nome, null]
+  );
+}
+
 // 🔐 NOVO: login
 export const loginUser = async (req, res) => {
   const { email, senha } = req.body;

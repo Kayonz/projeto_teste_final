@@ -3,6 +3,7 @@ import LoginRegisterPage from "../src/pages/LoginRegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import PrivateRoute from "./components/PrivateRoute";
 
+
 function App() {
   return (
     <BrowserRouter>

@@ -3,8 +3,12 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import pool from './config/database.js';
 import authRoutes from './routes/authRoutes.js';
+import categoriaRoutes from './routes/categoriaRoutes.js';
 
 dotenv.config();
+
+
+app.use('/api/categorias', categoriaRoutes);
 
 const app = express();
 app.use(cors());
