@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 
+
 const PageContainer = styled.div`
   display: flex;
   width: 100vw;
@@ -13,7 +14,7 @@ const PageContainer = styled.div`
 
 const LeftPanel = styled.div`
   flex: 1;
-  background-color: #25267e;
+  background-color: #925FE2;
   color: white;
   display: flex;
   flex-direction: column;
@@ -24,7 +25,7 @@ const LeftPanel = styled.div`
 
 const RightPanel = styled.div`
   flex: 1;
-  background-color: #eff0f9;
+  background-color: #1C1D21;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -34,6 +35,7 @@ const RightPanel = styled.div`
 
 const Title = styled.h1`
   margin-bottom: 16px;
+  color: #fff;
 `;
 
 const Subtitle = styled.p`
@@ -43,34 +45,77 @@ const Subtitle = styled.p`
 `;
 
 const Input = styled.input`
-  padding: 12px;
   margin-bottom: 16px;
+  padding: 16px; /* antes era 12px */
   width: 100%;
   max-width: 300px;
-  border: 1px solid #ccc;
+  border: 1px solid #fff;
   border-radius: 8px;
+  font-size: 1rem;
+  background-color: transparent;
+  text-decoration: none;
+  color: white;
+
+  &::placeholder {
+    color: #ccc;
+  }
 `;
+
 
 const Button = styled.button`
   padding: 12px 24px;
-  background-color: #25267e;
+  display: block;
+  background-color: #9C6FE4;
   color: white;
   border: none;
   border-radius: 8px;
   font-weight: bold;
   cursor: pointer;
-  margin-top: 10px;
+  margin: 16px auto 0 auto;
+  transition: all 0.2s ease;
 
   &:hover {
-    background-color: #1a1b66;
+    background-color: #8b5fd4;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  &:active {
+    transform: scale(0.98);
   }
 `;
+
 
 const ErrorMessage = styled.p`
   color: red;
   margin-top: 10px;
   text-align: center;
 `;
+
+const FloatingIcons = styled.div`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none; /* pra não atrapalhar cliques */
+`;
+
+const FloatingIcon = styled.img`
+  position: absolute;
+  width: 40px;
+  animation: floatIcon 15s linear infinite;
+  opacity: 0.2;
+
+  @keyframes floatIcon {
+    0% {
+      transform: translateY(100vh) translateX(0);
+    }
+    100% {
+      transform: translateY(-10vh) translateX(30vw);
+    }
+  }
+`;
+
 
 function LoginRegisterPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -118,18 +163,19 @@ function LoginRegisterPage() {
   };
 
   return (
+
     <PageContainer>
       <LeftPanel>
         <Title>Finance Soft!</Title>
       </LeftPanel>
 
       <RightPanel>
-        <Title>{isLogin ? "Login" : "Create Account"}</Title>
+        <Title>{isLogin ? "Login" : "Registre-se Conosco!"}</Title>
         <form onSubmit={handleSubmit}>
           {!isLogin && (
             <Input
               type="text"
-              placeholder="Name"
+              placeholder="Nome Completo"
               value={nome}
               onChange={(e) => setNome(e.target.value)}
               required
@@ -154,11 +200,11 @@ function LoginRegisterPage() {
         </form>
 
         {isLogin ? (
-          <Button onClick={() => setIsLogin(false)} style={{ background: "transparent", color: "#25267e" }}>
+          <Button onClick={() => setIsLogin(false)} style={{ background: "transparent", color: "#fff" }}>
             Criar nova conta
           </Button>
         ) : (
-          <Button onClick={() => setIsLogin(true)} style={{ background: "transparent", color: "#25267e" }}>
+          <Button onClick={() => setIsLogin(true)} style={{ background: "transparent", color: "#fff" }}>
             Já tem conta? Entrar
           </Button>
         )}

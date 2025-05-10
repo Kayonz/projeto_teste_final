@@ -18,20 +18,27 @@ const Header = styled.div`
 `;
 
 const Title = styled.h1`
-  color: #25267e;
+  color: #3f4872;
 `;
 
 const LogoutButton = styled.button`
-  background-color: #e94560;
+ background-color: #120428;
   color: white;
   padding: 10px 16px;
   border: none;
   border-radius: 8px;
   font-weight: bold;
   cursor: pointer;
+  transition: all 0.2s ease;
 
   &:hover {
-    background-color: #d0304d;
+    background-color: rgb(27, 4, 65);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  &:active {
+    transform: scale(0.98);
   }
 `;
 
@@ -78,15 +85,22 @@ const ContentWrapper = styled.div`
 
 const ActionButton = styled.button`
   padding: 12px 24px;
-  background-color: #25267e;
+  background-color: #3f4872;
   color: white;
   border: none;
   border-radius: 8px;
   font-weight: bold;
   cursor: pointer;
+  transition: all 0.2s ease;
 
   &:hover {
-    background-color: #1b1c6a;
+    background-color: #505c8c;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  &:active {
+    transform: scale(0.98);
   }
 `;
 

@@ -5,7 +5,7 @@ import { FaHome, FaMoneyBillWave, FaChartPie, FaSignOutAlt, FaBars } from "react
 const SidebarContainer = styled.div`
   height: 100vh;
   width: ${(props) => (props.isOpen ? "220px" : "70px")};
-  background-color: #25267e;
+  background-color: #6a0099;
   color: white;
   display: flex;
   flex-direction: column;
@@ -34,7 +34,7 @@ const MenuItem = styled.div`
   transition: background 0.2s;
 
   &:hover {
-    background-color: #1b1c6a;
+    background-color: #925FE2;
   }
 
   svg {
