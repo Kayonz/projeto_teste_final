@@ -1,9 +1,9 @@
 import express from 'express';
-import { getResumoFinanceiro } from '../controllers/financeiroController.js';
+import { atualizarOrcamento } from '../controllers/orcamentoController.js';
 import { verifyToken } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/resumo', verifyToken, getResumoFinanceiro);
+router.put('/', verifyToken, atualizarOrcamento);
 
 export default router;

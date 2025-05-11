@@ -132,7 +132,32 @@ function DashboardPage() {
   };
 
   const handleAddGasto = () => {
-    alert("Abrir leitura do cupom (OCR)");
+    const novoValor = prompt("Digite o novo valor do orçamento:");
+
+  if (!novoValor || isNaN(novoValor)) {
+    alert("Valor inválido!");
+    return;
+  }
+
+  const token = localStorage.getItem("token");
+
+  fetch("http://localhost:5000/api/orcamento", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ valor: parseFloat(novoValor) })
+  })
+    .then(res => res.json())
+    .then(data => {
+      alert(data.message || "Orçamento atualizado");
+      setOrcamento(parseFloat(novoValor)); 
+    })
+    .catch(err => {
+      console.error("Erro ao atualizar orçamento", err);
+      alert("Erro ao atualizar orçamento");
+    });
   };
 
   const handleSetOrcamento = () => {
@@ -154,18 +179,17 @@ function DashboardPage() {
 
         {currentView === "dashboard" && (
           <>
-            <Cards>
-              <Card>
-                <CardTitle>Orçamento Atual</CardTitle>
-                <CardValue>R$ {orcamento.toFixed(2)}</CardValue>
-              </Card>
+          <Cards>
+            <Card>
+              <CardTitle>Orçamento Atual</CardTitle>
+              <CardValue>R$ {(Number(orcamento) || 0).toFixed(2)}</CardValue>
+            </Card>
 
-              <Card>
-                <CardTitle>Gastos do mês</CardTitle>
-                <CardValue>R$ {gastos.toFixed(2)}</CardValue>
-              </Card>
-            </Cards>
-
+            <Card>
+              <CardTitle>Gastos do mês</CardTitle>
+              <CardValue>R$ {(Number(gastos) || 0).toFixed(2)}</CardValue>
+            </Card>
+          </Cards>
             <Actions>
               <ActionButton onClick={handleAddGasto}>
                 + Adicionar Gasto (Scan)

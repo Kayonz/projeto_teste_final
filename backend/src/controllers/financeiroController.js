@@ -22,4 +22,5 @@ export const getResumoFinanceiro = async (req, res) => {
     console.error("Erro ao buscar resumo financeiro:", error);
     res.status(500).json({ message: "Erro ao buscar resumo financeiro" });
   }
+  
 };
