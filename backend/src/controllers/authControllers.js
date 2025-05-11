@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// REGISTRO DE USUÁRIO
 export const registerUser = async (req, res) => {
   const { nome, email, senha } = req.body;
 
@@ -17,12 +18,33 @@ export const registerUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(senha, salt);
 
+    // Cria usuário e retorna ID
     const result = await pool.query(
       'INSERT INTO users (nome, email, senha) VALUES ($1, $2, $3) RETURNING id, nome, email',
       [nome, email, hashedPassword]
     );
 
     const newUser = result.rows[0];
+    const newUserId = newUser.id;
+
+    // Categorias padrão
+    const categoriasPadrao = [
+      "Alimentação",
+      "Transporte",
+      "Lazer",
+      "Moradia",
+      "Saúde",
+      "Educação",
+      "Outros"
+    ];
+
+    for (const nomeCategoria of categoriasPadrao) {
+      await pool.query(
+        'INSERT INTO categorias (usuario_id, nome, limite) VALUES ($1, $2, $3)',
+        [newUserId, nomeCategoria, null]
+      );
+    }
+
     res.status(201).json(newUser);
 
   } catch (error) {
@@ -31,26 +53,7 @@ export const registerUser = async (req, res) => {
   }
 };
 
-
-
-const categoriasPadrao = [
-  "Alimentação",
-  "Transporte",
-  "Lazer",
-  "Moradia",
-  "Saúde",
-  "Educação",
-  "Outros"
-];
-
-for (const nome of categoriasPadrao) {
-  await pool.query(
-    "INSERT INTO categorias (usuario_id, nome, limite) VALUES ($1, $2, $3)",
-    [newUserId, nome, null]
-  );
-}
-
-// 🔐 NOVO: login
+// LOGIN DE USUÁRIO
 export const loginUser = async (req, res) => {
   const { email, senha } = req.body;
 

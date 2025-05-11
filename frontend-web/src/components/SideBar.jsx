@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { FaHome, FaMoneyBillWave, FaChartPie, FaSignOutAlt, FaBars } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+
 
 const SidebarContainer = styled.div`
   height: 100vh;
@@ -52,6 +54,7 @@ function Sidebar({ onNavigate, onLogout }) {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
+    
     <SidebarContainer isOpen={isOpen}>
       <ToggleButton onClick={() => setIsOpen(!isOpen)}>
         <FaBars />
@@ -72,6 +75,11 @@ function Sidebar({ onNavigate, onLogout }) {
         <span>Orçamento</span>
       </MenuItem>
 
+      <MenuItem isOpen={isOpen} onClick={() => onNavigate("categorias")}>
+       <FaChartPie />
+       <span>Categorias</span>
+      </MenuItem>
+      
       <MenuItem isOpen={isOpen} onClick={onLogout}>
         <FaSignOutAlt />
         <span>Sair</span>
