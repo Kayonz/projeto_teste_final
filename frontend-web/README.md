@@ -1,8 +1,8 @@
-Para inicir o React 
+Para iniciar o React 
 
 npm start
 
 para o back 
 node src/app.js
 
-Utilizando futuramente tesseract
+Utilizando futuramente tesseract.js
