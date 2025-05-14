@@ -215,9 +215,9 @@ function DashboardPage() {
             </LogoutWrapper>
            <Title>Olá, bem-vindo!</Title>
           <Cards>  
-            <Card>  
-              <CardTitle>Orçamento Atual</CardTitle>
-              <CardValue>R$ {(Number(orcamento) || 0).toFixed(2)}</CardValue>
+            <Card>
+              <CardTitle>Disponível</CardTitle>
+              <CardValue>R$ {(orcamento - gastos).toFixed(2)}</CardValue>
             </Card>
 
             <Card>

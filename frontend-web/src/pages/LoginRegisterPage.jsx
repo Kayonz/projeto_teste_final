@@ -200,7 +200,7 @@ function LoginRegisterPage() {
         </form>
 
         {isLogin ? (
-          <Button onClick={() => setIsLogin(false)} style={{ background: "transparent", color: "#fff" }}>
+          <Button onClick={() => setIsLogin(false)} style={{ color: "#fff" }}>
             Criar nova conta
           </Button>
         ) : (

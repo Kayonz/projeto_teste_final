@@ -1,10 +1,36 @@
 import { useEffect, useState } from "react";
+import styled from "styled-components";
+
+const Container = styled.div`
+  padding: 2rem;
+`;
+
+const CategoriaItem = styled.div`
+  background: #fff;
+  padding: 16px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #f2f3ff;
+  }
+
+  h3 {
+    margin: 0;
+    color: #25267e;
+  }
+
+  p {
+    margin: 4px 0 0;
+    font-weight: bold;
+  }
+`;
 
 function CategoriasPage() {
   const [categorias, setCategorias] = useState([]);
-  const [editando, setEditando] = useState(null);
-  const [novoLimite, setNovoLimite] = useState("");
-
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -18,60 +44,21 @@ function CategoriasPage() {
       .catch(err => console.error("Erro ao carregar categorias:", err));
   }, []);
 
-  const handleSalvar = async (id) => {
-    try {
-      const res = await fetch(`http://localhost:5000/api/categorias/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ limite: parseFloat(novoLimite) }),
-      });
-
-      if (res.ok) {
-        const novasCategorias = categorias.map(cat =>
-          cat.id === id ? { ...cat, limite: parseFloat(novoLimite) } : cat
-        );
-        setCategorias(novasCategorias);
-        setEditando(null);
-        setNovoLimite("");
-      }
-    } catch (err) {
-      console.error("Erro ao atualizar limite:", err);
-    }
+  const handleCategoriaClick = (categoria) => {
+    // Exibir detalhes da categoria, como modal ou navegação
+    alert(`Gastos detalhados para: ${categoria.nome}`);
   };
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h2>Categorias</h2>
-      <ul>
-        {categorias.map((cat) => (
-          <li key={cat.id} style={{ marginBottom: "1rem" }}>
-            <strong>{cat.nome}:</strong>{" "}
-            {editando === cat.id ? (
-              <>
-                <input
-                  type="number"
-                  value={novoLimite}
-                  onChange={(e) => setNovoLimite(e.target.value)}
-                />
-                <button onClick={() => handleSalvar(cat.id)}>Salvar</button>
-                <button onClick={() => setEditando(null)}>Cancelar</button>
-              </>
-            ) : (
-              <>
-                R$ {cat.limite ?? "Sem limite"}
-                <button onClick={() => {
-                  setEditando(cat.id);
-                  setNovoLimite(cat.limite ?? "");
-                }}>Editar</button>
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
-    </div>
+    <Container>
+      <h2 style={{ color: "#25267e" }}>Categorias</h2>
+      {categorias.map((cat) => (
+        <CategoriaItem key={cat.id} onClick={() => handleCategoriaClick(cat)}>
+          <h3>{cat.nome}</h3>
+          <p>Total gasto: R$ {parseFloat(cat.totalGasto || 0).toFixed(2)}</p>
+        </CategoriaItem>
+      ))}
+    </Container>
   );
 }
 
