@@ -23,7 +23,6 @@ export const updateCategoria = async (req, res) => {
   const { limite } = req.body;
 
   try {
-    // Verifica se a categoria pertence ao usuário
     const check = await pool.query(
       'SELECT * FROM categorias WHERE id = $1 AND usuario_id = $2',
       [categoriaId, userId]

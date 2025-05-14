@@ -6,11 +6,11 @@ import authRoutes from './routes/authRoutes.js';
 import categoriaRoutes from './routes/categoriaRoutes.js';
 import financeiroRoutes from './routes/financeiroRoutes.js'
 import orcamentoRoutes from './routes/orcamentoRoutes.js';
-import orcRoutes from './routes/orcamentoRoutes.js'
+import orcRoutes from './routes/ocrRoutes.js'
 
 dotenv.config();
 
-const app = express(); // ✅ Cria o app primeiro
+const app = express(); 
 app.use(cors());
 app.use(express.json());
 

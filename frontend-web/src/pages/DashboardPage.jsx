@@ -2,6 +2,7 @@ import styled from "styled-components";
 import CategoriasView from "./CategoriasView";
 import Sidebar from "../components/SideBar.jsx";
 import { useEffect, useState } from "react";
+import CupomUploadForm from "../components/CupomUploadForm.jsx";
 
 const Container = styled.div`
   width: 100vw;
@@ -229,6 +230,7 @@ function DashboardPage() {
         {currentView === "gasto" && <h2>Formulário de Gasto</h2>}
         {currentView === "categorias" && <CategoriasView />}
         {currentView === "orcamento" && <h2>Formulário de Orçamento</h2>}
+        {currentView === "gasto" && <CupomUploadForm />}
       </ContentWrapper>
     </Container>
   );
