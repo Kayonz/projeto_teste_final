@@ -6,7 +6,7 @@ import authRoutes from './routes/authRoutes.js';
 import categoriaRoutes from './routes/categoriaRoutes.js';
 import financeiroRoutes from './routes/financeiroRoutes.js'
 import orcamentoRoutes from './routes/orcamentoRoutes.js';
-
+import orcRoutes from './routes/orcamentoRoutes.js'
 
 dotenv.config();
 
@@ -19,6 +19,7 @@ app.use('/api/categorias', categoriaRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/financeiro', financeiroRoutes);
 app.use('/api/orcamento', orcamentoRoutes);
+app.use('/api/ocr', orcRoutes);
 
 
 

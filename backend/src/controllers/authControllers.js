@@ -41,7 +41,7 @@ export const registerUser = async (req, res) => {
     for (const nomeCategoria of categoriasPadrao) {
       await pool.query(
         'INSERT INTO categorias (usuario_id, nome, limite) VALUES ($1, $2, $3)',
-        [newUserId, nomeCategoria, null]
+        [newUser.id, nomeCategoria, null]
       );
     }
 

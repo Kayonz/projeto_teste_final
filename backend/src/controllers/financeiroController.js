@@ -5,8 +5,8 @@ export const getResumoFinanceiro = async (req, res) => {
 
   try {
     const orcamentoResult = await pool.query(
-      'SELECT SUM(limite) as total_orcamento FROM categorias WHERE usuario_id = $1',
-      [userId]
+        'SELECT orcamento_total FROM users WHERE id = $1',
+         [userId]
     );
 
     const gastoResult = await pool.query(

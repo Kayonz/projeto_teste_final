@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { FaHome, FaMoneyBillWave, FaChartPie, FaSignOutAlt, FaBars } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { FaHome, FaMoneyBillWave, FaChartPie, FaSignOutAlt, FaBars, FaCamera } from "react-icons/fa";
+import { FaUser } from "react-icons/fa";
+import { MdCategory } from "react-icons/md";
 
 
 const SidebarContainer = styled.div`
@@ -61,25 +62,30 @@ function Sidebar({ onNavigate, onLogout }) {
       </ToggleButton>
 
       <MenuItem isOpen={isOpen} onClick={() => onNavigate("dashboard")}>
-        <FaHome />
+        <FaChartPie />
         <span>Dashboard</span>
       </MenuItem>
 
       <MenuItem isOpen={isOpen} onClick={() => onNavigate("gasto")}>
-        <FaMoneyBillWave />
-        <span>Adicionar Gasto</span>
+        <FaCamera />
+        <span>Ler Cupom Fiscal</span>
       </MenuItem>
 
       <MenuItem isOpen={isOpen} onClick={() => onNavigate("orcamento")}>
-        <FaChartPie />
+        <FaMoneyBillWave />
         <span>Orçamento</span>
       </MenuItem>
 
       <MenuItem isOpen={isOpen} onClick={() => onNavigate("categorias")}>
-       <FaChartPie />
+       <MdCategory />
        <span>Categorias</span>
       </MenuItem>
-      
+
+      <MenuItem isOpen={isOpen} onClick={() => onNavigate("editarperfil")}>
+      <FaUser />
+      <span>Editar Perfil</span>
+      </MenuItem>
+
       <MenuItem isOpen={isOpen} onClick={onLogout}>
         <FaSignOutAlt />
         <span>Sair</span>

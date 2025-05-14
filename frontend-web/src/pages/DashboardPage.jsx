@@ -161,8 +161,33 @@ function DashboardPage() {
   };
 
   const handleSetOrcamento = () => {
-    alert("Abrir modal para definir orçamento mensal");
-  };
+  const novoValor = prompt("Digite o novo valor do orçamento:");
+
+  if (!novoValor || isNaN(novoValor)) {
+    alert("Valor inválido!");
+    return;
+  }
+
+  const token = localStorage.getItem("token");
+
+  fetch("http://localhost:5000/api/orcamento", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ valor: parseFloat(novoValor) })
+  })
+    .then(res => res.json())
+    .then(data => {
+      alert(data.message || "Orçamento atualizado");
+      setOrcamento(parseFloat(novoValor)); 
+    })
+    .catch(err => {
+      console.error("Erro ao atualizar orçamento", err);
+      alert("Erro ao atualizar orçamento");
+    });
+};
 
   const handleNavigation = (destino) => {
     setCurrentView(destino);
@@ -173,7 +198,7 @@ function DashboardPage() {
       <Sidebar onNavigate={handleNavigation} onLogout={handleLogout} />
       <ContentWrapper>
         <Header>
-          <Title>Olá, bem-vindo(a)!</Title>
+          <Title>Olá, bem-vindo!</Title>
           <LogoutButton onClick={handleLogout}>Sair</LogoutButton>
         </Header>
 
@@ -192,7 +217,7 @@ function DashboardPage() {
           </Cards>
             <Actions>
               <ActionButton onClick={handleAddGasto}>
-                + Adicionar Gasto (Scan)
+                + Ler Cupom Fiscal  
               </ActionButton>
               <ActionButton onClick={handleSetOrcamento}>
                 + Definir Orçamento
