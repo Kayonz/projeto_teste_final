@@ -8,9 +8,11 @@ const Container = styled.div`
   width: 100vw;
   height: 100vh;
   background-color: #eff0f9;
-  padding: 40px;
+  padding: 0;
   font-family: "Montserrat", sans-serif;
   box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
 `;
 
 const Header = styled.div`
@@ -24,7 +26,7 @@ const Title = styled.h1`
 `;
 
 const LogoutButton = styled.button`
- background-color: #120428;
+ background-color:rgb(74, 9, 179);
   color: white;
   padding: 10px 16px;
   border: none;
@@ -34,7 +36,7 @@ const LogoutButton = styled.button`
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: rgb(27, 4, 65);
+    background-color: rgb(64, 5, 153);
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
   }
@@ -104,6 +106,13 @@ const ActionButton = styled.button`
   &:active {
     transform: scale(0.98);
   }
+`;
+
+const LogoutWrapper = styled.div`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
 `;
 
 function DashboardPage() {
@@ -198,15 +207,15 @@ function DashboardPage() {
     <Container>
       <Sidebar onNavigate={handleNavigation} onLogout={handleLogout} />
       <ContentWrapper>
-        <Header>
-          <Title>Olá, bem-vindo!</Title>
-          <LogoutButton onClick={handleLogout}>Sair</LogoutButton>
-        </Header>
 
         {currentView === "dashboard" && (
           <>
-          <Cards>
-            <Card>
+          <LogoutWrapper>
+              <LogoutButton onClick={handleLogout}>Fazer Logout</LogoutButton>
+            </LogoutWrapper>
+           <Title>Olá, bem-vindo!</Title>
+          <Cards>  
+            <Card>  
               <CardTitle>Orçamento Atual</CardTitle>
               <CardValue>R$ {(Number(orcamento) || 0).toFixed(2)}</CardValue>
             </Card>

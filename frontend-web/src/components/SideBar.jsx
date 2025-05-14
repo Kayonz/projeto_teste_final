@@ -13,10 +13,11 @@ const SidebarContainer = styled.div`
   display: flex;
   flex-direction: column;
   transition: width 0.3s ease;
-  position: fixed;
+  position: absolute; /* era fixed */
   top: 0;
   left: 0;
   z-index: 1000;
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3);
 `;
 
 const ToggleButton = styled.button`

@@ -15,9 +15,25 @@ const Title = styled.h2`
   color: #25267e;
 `;
 
-const Input = styled.input`
+const HiddenInput = styled.input`
+  display: none;
+`;
+
+const FileLabel = styled.label`
+  padding: 10px 16px;
+  background-color: #25267e;
+  color: white;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  display: inline-block;
+  margin-bottom: 12px;
+`;
+
+const FileName = styled.span`
   display: block;
   margin-bottom: 16px;
+  color: #333;
 `;
 
 const Button = styled.button`
@@ -39,6 +55,13 @@ const Message = styled.p`
   margin-top: 12px;
   color: green;
 `;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+`;
+
 
 function CupomUploadForm() {
   const [imagem, setImagem] = useState(null);
@@ -76,19 +99,20 @@ function CupomUploadForm() {
   };
 
   return (
-    <Wrapper>
-      <Title>Enviar Cupom Fiscal</Title>
-      <form onSubmit={handleSubmit}>
-        <Input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setImagem(e.target.files[0])}
-          required
-        />
-        <Button type="submit">Enviar</Button>
-      </form>
-      {mensagem && <Message>{mensagem}</Message>}
-    </Wrapper>
+    <form onSubmit={handleSubmit}>
+  <ButtonGroup>
+    <FileLabel htmlFor="fileInput">Escolher Arquivo</FileLabel>
+    <HiddenInput
+      id="fileInput"
+      type="file"
+      accept="image/*"
+      onChange={(e) => setImagem(e.target.files[0])}
+      required
+    />
+    <Button type="submit">Enviar</Button>
+  </ButtonGroup>
+  {imagem && <FileName>{imagem.name}</FileName>}
+</form>
   );
 }
 
