@@ -217,7 +217,7 @@ function DashboardPage() {
           <Cards>  
             <Card>
               <CardTitle>Disponível</CardTitle>
-              <CardValue>R$ {(orcamento - gastos).toFixed(2)}</CardValue>
+              <CardValue>R$ {(Number(orcamento - gastos) || 0).toFixed(2)}</CardValue>
             </Card>
 
             <Card>
@@ -236,7 +236,7 @@ function DashboardPage() {
           </>
         )}
 
-        {currentView === "gasto" && <h2>Formulário de Gasto</h2>}
+        {currentView === "gasto"}
         {currentView === "categorias" && <CategoriasView />}
         {currentView === "orcamento" && <h2>Formulário de Orçamento</h2>}
         {currentView === "gasto" && <CupomUploadForm />}

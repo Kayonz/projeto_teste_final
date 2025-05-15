@@ -3,6 +3,7 @@ import LoginRegisterPage from "../src/pages/LoginRegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import CategoriasView from "./pages/CategoriasView";
 import PrivateRoute from "./components/PrivateRoute";
+import PerfilPage from "./pages/PerfilPage";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
             </PrivateRoute>
           }
         />
+        <Route path="/perfil" element={<PerfilPage />} />
         <Route
           path="/categorias"
           element={
