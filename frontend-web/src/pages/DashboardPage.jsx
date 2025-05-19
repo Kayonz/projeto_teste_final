@@ -2,7 +2,7 @@ import styled from "styled-components";
 import CategoriasView from "./CategoriasView";
 import Sidebar from "../components/SideBar.jsx";
 import { useEffect, useState } from "react";
-import CupomUploadForm from "../components/CupomUploadForm.jsx";
+import CupomUploadForm from "./CupomUploadForm.jsx";
 
 const Container = styled.div`
   width: 100vw;
@@ -79,6 +79,7 @@ const Actions = styled.div`
   gap: 16px;
   flex-wrap: wrap;
 `;
+
 const ContentWrapper = styled.div`
   margin-left: 220px; /* mesma largura da Sidebar */
   padding: 40px;
@@ -117,13 +118,14 @@ const LogoutWrapper = styled.div`
 
 function DashboardPage() {
   const [currentView, setCurrentView] = useState("dashboard");
+
   const [orcamento, setOrcamento] = useState(0);
   const [gastos, setGastos] = useState(0);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    fetch("http://localhost:5000/api/financeiro/resumo", {
+    fetch("", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -138,66 +140,43 @@ function DashboardPage() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    window.location.href = "/";
-  };
-
-  const handleAddGasto = () => {
-    const novoValor = prompt("Digite o novo valor do orçamento:");
-
-  if (!novoValor || isNaN(novoValor)) {
-    alert("Valor inválido!");
-    return;
-  }
-
-  const token = localStorage.getItem("token");
-
-  fetch("http://localhost:5000/api/orcamento", {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify({ valor: parseFloat(novoValor) })
-  })
-    .then(res => res.json())
-    .then(data => {
-      alert(data.message || "Orçamento atualizado");
-      setOrcamento(parseFloat(novoValor)); 
-    })
-    .catch(err => {
-      console.error("Erro ao atualizar orçamento", err);
-      alert("Erro ao atualizar orçamento");
-    });
+    window.location.href = "/login";
   };
 
   const handleSetOrcamento = () => {
-  const novoValor = prompt("Digite o novo valor do orçamento:");
+    const novoValor = prompt("Digite o novo valor do orçamento:");
 
-  if (!novoValor || isNaN(novoValor)) {
-    alert("Valor inválido!");
-    return;
-  }
+    if (!novoValor || isNaN(novoValor)) {
+      alert("Valor inválido!");
+      return;
+    }
+  
+    const token = localStorage.getItem("token");
 
-  const token = localStorage.getItem("token");
-
-  fetch("http://localhost:5000/api/orcamento", {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify({ valor: parseFloat(novoValor) })
-  })
-    .then(res => res.json())
-    .then(data => {
-      alert(data.message || "Orçamento atualizado");
-      setOrcamento(parseFloat(novoValor)); 
+    fetch("http://localhost:5000/api/orcamento", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ valor: parseFloat(novoValor) }),
     })
-    .catch(err => {
-      console.error("Erro ao atualizar orçamento", err);
-      alert("Erro ao atualizar orçamento");
-    });
+      .then((res) => res.json())
+      .then((data) => {
+        alert(data.message || "Orçamento atualizado");
+        setOrcamento(parseFloat(novoValor));
+      })
+      .catch((err) => {
+        console.error("Erro ao atualizar orçamento", err);
+        alert("Erro ao atualizar orçamento");
+      });
+  };
+
+  const handleOpenCupom = () => {
+  console.log("Clicou para abrir cupom!");
+  setCurrentView("gasto");
 };
+
 
   const handleNavigation = (destino) => {
     setCurrentView(destino);
@@ -207,27 +186,26 @@ function DashboardPage() {
     <Container>
       <Sidebar onNavigate={handleNavigation} onLogout={handleLogout} />
       <ContentWrapper>
-
         {currentView === "dashboard" && (
           <>
-          <LogoutWrapper>
+            <LogoutWrapper>
               <LogoutButton onClick={handleLogout}>Fazer Logout</LogoutButton>
             </LogoutWrapper>
-           <Title>Olá, bem-vindo!</Title>
-          <Cards>  
-            <Card>
-              <CardTitle>Disponível</CardTitle>
-              <CardValue>R$ {(Number(orcamento - gastos) || 0).toFixed(2)}</CardValue>
-            </Card>
+            <Title>Olá, bem-vindo!</Title>
+            <Cards>
+              <Card>
+                <CardTitle>Disponível</CardTitle>
+                <CardValue>R$ {(Number(orcamento - gastos) || 0).toFixed(2)}</CardValue>
+              </Card>
 
-            <Card>
-              <CardTitle>Gastos do mês</CardTitle>
-              <CardValue>R$ {(Number(gastos) || 0).toFixed(2)}</CardValue>
-            </Card>
-          </Cards>
+              <Card>
+                <CardTitle>Gastos do mês</CardTitle>
+                <CardValue>R$ {(Number(gastos) || 0).toFixed(2)}</CardValue>
+              </Card>
+            </Cards>
             <Actions>
-              <ActionButton onClick={handleAddGasto}>
-                + Ler Cupom Fiscal  
+              <ActionButton onClick={handleOpenCupom}>
+                + Ler Cupom Fiscal
               </ActionButton>
               <ActionButton onClick={handleSetOrcamento}>
                 + Definir Orçamento
@@ -236,9 +214,7 @@ function DashboardPage() {
           </>
         )}
 
-        {currentView === "gasto"}
         {currentView === "categorias" && <CategoriasView />}
-        {currentView === "orcamento" && <h2>Formulário de Orçamento</h2>}
         {currentView === "gasto" && <CupomUploadForm />}
       </ContentWrapper>
     </Container>

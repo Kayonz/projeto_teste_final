@@ -1,34 +1,22 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import LoginRegisterPage from "../src/pages/LoginRegisterPage";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import CupomUploadForm from "./pages/CupomUploadForm";
 import DashboardPage from "./pages/DashboardPage";
 import CategoriasView from "./pages/CategoriasView";
-import PrivateRoute from "./components/PrivateRoute";
+import LoginRegisterPage from "./pages/LoginRegisterPage";
 import PerfilPage from "./pages/PerfilPage";
 
 function App() {
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
-        <Route path="/" element={<LoginRegisterPage />} />
-        <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute>
-              <DashboardPage />
-            </PrivateRoute>
-          }
-        />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/categorias" element={<CategoriasView />} />
+        <Route path="/login" element={<LoginRegisterPage />} />
         <Route path="/perfil" element={<PerfilPage />} />
-        <Route
-          path="/categorias"
-          element={
-            <PrivateRoute>
-              <CategoriasView />
-            </PrivateRoute>
-          }
-        />
+        <Route path="/cupom" element={<CupomUploadForm />} />
+        <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }
 

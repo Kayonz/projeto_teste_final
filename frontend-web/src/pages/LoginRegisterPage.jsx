@@ -195,7 +195,7 @@ function LoginRegisterPage() {
             onChange={(e) => setSenha(e.target.value)}
             required
           />
-          <Button type="submit">{isLogin ? "LOGIN" : "SIGN UP"}</Button>
+          <Button type="submit">{isLogin ? "Login" : "Registre-se"}</Button>
           {erro && <ErrorMessage>{erro}</ErrorMessage>}
         </form>
 
@@ -204,7 +204,7 @@ function LoginRegisterPage() {
             Criar nova conta
           </Button>
         ) : (
-          <Button onClick={() => setIsLogin(true)} style={{ background: "transparent", color: "#fff" }}>
+          <Button onClick={() => setIsLogin(true)} style={{ color: "#fff" }}>
             Já tem conta? Entrar
           </Button>
         )}

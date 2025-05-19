@@ -1,43 +1,28 @@
+import pool from '../config/database.js';
+import bcrypt from 'bcrypt'; // ou bcryptjs
+import jwt from 'jsonwebtoken';
+
 export const registerUser = async (req, res) => {
-  const { nome, email, senha } = req.body;
+  // seu código atual aqui
+};
+
+export const loginUser = async (req, res) => {
+  const { email, senha } = req.body;
 
   try {
-    const userExists = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (userExists.rows.length > 0) {
-      return res.status(400).json({ message: 'Email já cadastrado' });
+    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    if (result.rows.length === 0) {
+      return res.status(401).json({ message: 'Usuário não encontrado' });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(senha, salt);
-
-    const result = await pool.query(
-      'INSERT INTO users (nome, email, senha) VALUES ($1, $2, $3) RETURNING id, nome, email',
-      [nome, email, hashedPassword]
-    );
-
-    const newUser = result.rows[0];
-    const newUserId = newUser.id;
-
-    // Cria categorias padrão com limite inicial
-    const categoriasPadrao = [
-      "Alimentação",
-      "Transporte",
-      "Lazer",
-      "Moradia",
-      "Saúde",
-      "Educação",
-      "Outros"
-    ];
-
-    for (const nomeCategoria of categoriasPadrao) {
-      await pool.query(
-        "INSERT INTO categorias (usuario_id, nome, limite) VALUES ($1, $2, $3)",
-        [newUserId, nomeCategoria, 100] // limite padrão de R$ 100
-      );
+    const user = result.rows[0];
+    const isMatch = await bcrypt.compare(senha, user.senha);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Senha incorreta' });
     }
 
-    res.status(201).json(newUser);
-
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    res.status(200).json({ token, user: { id: user.id, nome: user.nome, email: user.email } });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erro no servidor' });

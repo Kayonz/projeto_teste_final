@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import Sidebar from "../components/SideBar";
+import { useNavigate } from "react-router-dom";
 
 const Container = styled.div`
   width: 100vw;
@@ -64,11 +65,22 @@ const Button = styled.button`
 `;
 
 function EditarPerfil() {
+  const navigate = useNavigate();
+
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [fotoPerfil, setFotoPerfil] = useState(null);
+
+  const handleNavigation = (destino) => {
+    navigate(`/${destino}`);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/");
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -77,7 +89,7 @@ function EditarPerfil() {
 
   return (
     <Container>
-      <Sidebar />
+      <Sidebar onNavigate={handleNavigation} onLogout={handleLogout} />
       <ContentWrapper>
         <Title>Editar Perfil</Title>
         <Form onSubmit={handleSubmit}>

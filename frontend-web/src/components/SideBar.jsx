@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { FaHome, FaMoneyBillWave, FaChartPie, FaSignOutAlt, FaBars, FaCamera } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
 import { MdCategory } from "react-icons/md";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const SidebarContainer = styled.div`
   height: 100vh;
@@ -52,32 +52,32 @@ const MenuItem = styled.div`
   }
 `;
 
-function Sidebar({ onNavigate, onLogout }) {
+function Sidebar({ onLogout }) {
   const [isOpen, setIsOpen] = useState(true);
+  const navigate = useNavigate();
 
   return (
-    
     <SidebarContainer isOpen={isOpen}>
       <ToggleButton onClick={() => setIsOpen(!isOpen)}>
         <FaBars />
       </ToggleButton>
 
-      <MenuItem isOpen={isOpen} onClick={() => onNavigate("dashboard")}>
+      <MenuItem isOpen={isOpen} onClick={() => navigate("/dashboard")}>
         <FaChartPie />
         <span>Dashboard</span>
       </MenuItem>
 
-      <MenuItem isOpen={isOpen} onClick={() => onNavigate("gasto")}>
+      <MenuItem isOpen={isOpen} onClick={() => navigate("/cupom")}>
         <FaCamera />
         <span>Ler Cupom Fiscal</span>
       </MenuItem>
 
-      <MenuItem isOpen={isOpen} onClick={() => onNavigate("orcamento")}>
+      <MenuItem isOpen={isOpen} onClick={() => navigate("/orcamento")}>
         <FaMoneyBillWave />
         <span>Orçamento</span>
       </MenuItem>
 
-      <MenuItem isOpen={isOpen} onClick={() => onNavigate("categorias")}>
+      <MenuItem isOpen={isOpen} onClick={() => navigate("/categorias")}>
        <MdCategory />
        <span>Categorias</span>
       </MenuItem>
@@ -89,7 +89,7 @@ function Sidebar({ onNavigate, onLogout }) {
       </MenuItem>
       </Link>
 
-      <MenuItem isOpen={isOpen} onClick={onLogout}>
+      <MenuItem isOpen={isOpen} onClick={() => navigate("/login")}>
         <FaSignOutAlt />
         <span>Sair</span>
       </MenuItem>
