@@ -26,7 +26,7 @@ const Title = styled.h1`
 `;
 
 const LogoutButton = styled.button`
- background-color:rgb(74, 9, 179);
+  background-color: rgb(74, 9, 179);
   color: white;
   padding: 10px 16px;
   border: none;
@@ -125,46 +125,74 @@ function DashboardPage() {
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    fetch("", {
+    // Buscar orçamento
+    fetch("http://localhost:5000/api/orcamento", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
       .then((res) => res.json())
       .then((data) => {
-        setOrcamento(data.orcamento);
-        setGastos(data.gastos);
+        setOrcamento(data.orcamento ?? 0);
       })
-      .catch((err) => console.error("Erro ao buscar resumo financeiro", err));
+      .catch((err) => console.error("Erro ao buscar orçamento", err));
+
+    // Buscar gastos do mês
+    fetchGastos();
   }, []);
+
+  // Atualiza gastos ao voltar para a view "dashboard"
+  useEffect(() => {
+    if (currentView === "dashboard") {
+      fetchGastos();
+    }
+  }, [currentView]);
+
+  const fetchGastos = () => {
+    const token = localStorage.getItem("token");
+
+    fetch("http://localhost:5000/api/gastos-mes", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setGastos(data.totalGastos ?? 0);
+      })
+      .catch((err) => console.error("Erro ao buscar gastos do mês", err));
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     window.location.href = "/login";
   };
 
+  // Aqui a atualização soma o valor digitado ao orçamento atual
   const handleSetOrcamento = () => {
-    const novoValor = prompt("Digite o novo valor do orçamento:");
+    const valorAdicionar = prompt("Digite o valor a adicionar ao orçamento:");
 
-    if (!novoValor || isNaN(novoValor)) {
+    if (!valorAdicionar || isNaN(valorAdicionar)) {
       alert("Valor inválido!");
       return;
     }
-  
+
+    const valorSomado = Number(orcamento) + parseFloat(valorAdicionar);
+
     const token = localStorage.getItem("token");
 
     fetch("http://localhost:5000/api/orcamento", {
-      method: "PUT",
+      method: "POST", // ou PUT, conforme seu backend
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ valor: parseFloat(novoValor) }),
+      body: JSON.stringify({ valor: valorSomado }),
     })
       .then((res) => res.json())
       .then((data) => {
         alert(data.message || "Orçamento atualizado");
-        setOrcamento(parseFloat(novoValor));
+        setOrcamento(valorSomado);
       })
       .catch((err) => {
         console.error("Erro ao atualizar orçamento", err);
@@ -172,12 +200,12 @@ function DashboardPage() {
       });
   };
 
+  // Abre tela de upload do cupom
   const handleOpenCupom = () => {
-  console.log("Clicou para abrir cupom!");
-  setCurrentView("gasto");
-};
+    setCurrentView("gasto");
+  };
 
-
+  // Para navegar entre views no menu lateral
   const handleNavigation = (destino) => {
     setCurrentView(destino);
   };
@@ -195,7 +223,9 @@ function DashboardPage() {
             <Cards>
               <Card>
                 <CardTitle>Disponível</CardTitle>
-                <CardValue>R$ {(Number(orcamento - gastos) || 0).toFixed(2)}</CardValue>
+                <CardValue>
+                  R$ {(Number(orcamento - gastos) || 0).toFixed(2)}
+                </CardValue>
               </Card>
 
               <Card>
@@ -208,14 +238,20 @@ function DashboardPage() {
                 + Ler Cupom Fiscal
               </ActionButton>
               <ActionButton onClick={handleSetOrcamento}>
-                + Definir Orçamento
+                + Adicionar ao Orçamento
               </ActionButton>
             </Actions>
           </>
         )}
 
         {currentView === "categorias" && <CategoriasView />}
-        {currentView === "gasto" && <CupomUploadForm />}
+
+        {currentView === "gasto" && (
+          <CupomUploadForm
+            onGastosAtualizados={fetchGastos}
+            voltarDashboard={() => setCurrentView("dashboard")}
+          />
+        )}
       </ContentWrapper>
     </Container>
   );

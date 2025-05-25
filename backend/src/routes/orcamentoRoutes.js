@@ -1,9 +1,11 @@
+// routes/orcamentoRoutes.js
 import express from 'express';
-import { atualizarOrcamento } from '../controllers/orcamentoController.js';
 import { verifyToken } from '../middlewares/authMiddleware.js';
+import { getOrcamento, salvarOrcamento } from '../controllers/orcamentoController.js';
 
 const router = express.Router();
 
-router.put('/', verifyToken, atualizarOrcamento);
+router.get('/', verifyToken, getOrcamento);
+router.post('/', verifyToken, salvarOrcamento);
 
 export default router;

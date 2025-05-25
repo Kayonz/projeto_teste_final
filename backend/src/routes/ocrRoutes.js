@@ -6,6 +6,6 @@ import { verifyToken } from '../middlewares/authMiddleware.js';
 const upload = multer({ dest: 'uploads/' });
 const router = express.Router();
 
-router.post('/upload-cupom', verifyToken, upload.single('imagem'), processarCupom);
+router.post('/cupom-upload', verifyToken, upload.single('imagem'), processarCupom);
 
 export default router;

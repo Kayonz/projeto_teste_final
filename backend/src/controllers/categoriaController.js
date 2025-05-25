@@ -1,6 +1,6 @@
 import pool from '../config/database.js';
 
-// GET /api/categorias
+
 export const getCategorias = async (req, res) => {
   const userId = req.userId;
 
@@ -16,7 +16,7 @@ export const getCategorias = async (req, res) => {
   }
 };
 
-// PUT /api/categorias/:id
+
 export const updateCategoria = async (req, res) => {
   const userId = req.userId;
   const categoriaId = req.params.id;
@@ -31,7 +31,6 @@ export const updateCategoria = async (req, res) => {
       return res.status(404).json({ message: 'Categoria não encontrada ou não pertence ao usuário' });
     }
 
-    // Atualiza o limite
     await pool.query(
       'UPDATE categorias SET limite = $1 WHERE id = $2',
       [limite, categoriaId]
