@@ -3,6 +3,7 @@ import CategoriasView from "./CategoriasView";
 import Sidebar from "../components/SideBar.jsx";
 import { useEffect, useState } from "react";
 import CupomUploadForm from "./CupomUploadForm.jsx";
+import { useNavigate } from "react-router-dom";
 
 const Container = styled.div`
   width: 100vw;
@@ -118,30 +119,36 @@ const LogoutWrapper = styled.div`
 
 function DashboardPage() {
   const [currentView, setCurrentView] = useState("dashboard");
-
   const [orcamento, setOrcamento] = useState(0);
   const [gastos, setGastos] = useState(0);
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    if (!token) {
+      window.location.href = "/login";
+      return;
+    }
 
-    // Buscar orçamento
     fetch("http://localhost:5000/api/orcamento", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     })
-      .then((res) => res.json())
-      .then((data) => {
-        setOrcamento(data.orcamento ?? 0);
+      .then((res) => {
+        if (!res.ok) throw new Error("Falha ao buscar orçamento");
+        return res.json();
       })
-      .catch((err) => console.error("Erro ao buscar orçamento", err));
+      .then((data) => {
+        setOrcamento(Number(data.orcamento) || 0);
+      })
+      .catch((err) => {
+        console.error(err);
+        setOrcamento(0);
+      });
 
-    // Buscar gastos do mês
     fetchGastos();
-  }, []);
+  }, [token]);
 
-  // Atualiza gastos ao voltar para a view "dashboard"
+
   useEffect(() => {
     if (currentView === "dashboard") {
       fetchGastos();
@@ -149,18 +156,20 @@ function DashboardPage() {
   }, [currentView]);
 
   const fetchGastos = () => {
-    const token = localStorage.getItem("token");
-
     fetch("http://localhost:5000/api/gastos-mes", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     })
-      .then((res) => res.json())
-      .then((data) => {
-        setGastos(data.totalGastos ?? 0);
+      .then((res) => {
+        if (!res.ok) throw new Error("Falha ao buscar gastos");
+        return res.json();
       })
-      .catch((err) => console.error("Erro ao buscar gastos do mês", err));
+      .then((data) => {
+        setGastos(Number(data.totalGastos) || 0);
+      })
+      .catch((err) => {
+        console.error(err);
+        setGastos(0);
+      });
   };
 
   const handleLogout = () => {
@@ -168,7 +177,6 @@ function DashboardPage() {
     window.location.href = "/login";
   };
 
-  // Aqui a atualização soma o valor digitado ao orçamento atual
   const handleSetOrcamento = () => {
     const valorAdicionar = prompt("Digite o valor a adicionar ao orçamento:");
 
@@ -177,35 +185,34 @@ function DashboardPage() {
       return;
     }
 
-    const valorSomado = Number(orcamento) + parseFloat(valorAdicionar);
-
-    const token = localStorage.getItem("token");
+    const valorSomado = orcamento + parseFloat(valorAdicionar);
 
     fetch("http://localhost:5000/api/orcamento", {
-      method: "POST", // ou PUT, conforme seu backend
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ valor: valorSomado }),
     })
-      .then((res) => res.json())
-      .then((data) => {
-        alert(data.message || "Orçamento atualizado");
+      .then((res) => {
+        if (!res.ok) throw new Error("Erro ao atualizar orçamento");
+        return res.json();
+      })
+      .then(() => {
+        alert("Orçamento atualizado com sucesso");
         setOrcamento(valorSomado);
       })
       .catch((err) => {
-        console.error("Erro ao atualizar orçamento", err);
+        console.error(err);
         alert("Erro ao atualizar orçamento");
       });
   };
 
-  // Abre tela de upload do cupom
   const handleOpenCupom = () => {
-    setCurrentView("gasto");
+  navigate("/cupom");
   };
 
-  // Para navegar entre views no menu lateral
   const handleNavigation = (destino) => {
     setCurrentView(destino);
   };
@@ -219,27 +226,26 @@ function DashboardPage() {
             <LogoutWrapper>
               <LogoutButton onClick={handleLogout}>Fazer Logout</LogoutButton>
             </LogoutWrapper>
+
             <Title>Olá, bem-vindo!</Title>
+
             <Cards>
               <Card>
                 <CardTitle>Disponível</CardTitle>
                 <CardValue>
-                  R$ {(Number(orcamento - gastos) || 0).toFixed(2)}
+                  R$ {(orcamento - gastos).toFixed(2)}
                 </CardValue>
               </Card>
 
               <Card>
                 <CardTitle>Gastos do mês</CardTitle>
-                <CardValue>R$ {(Number(gastos) || 0).toFixed(2)}</CardValue>
+                <CardValue>R$ {gastos.toFixed(2)}</CardValue>
               </Card>
             </Cards>
+
             <Actions>
-              <ActionButton onClick={handleOpenCupom}>
-                + Ler Cupom Fiscal
-              </ActionButton>
-              <ActionButton onClick={handleSetOrcamento}>
-                + Adicionar ao Orçamento
-              </ActionButton>
+              <ActionButton onClick={handleOpenCupom}>+ Ler Cupom Fiscal</ActionButton>
+              <ActionButton onClick={handleSetOrcamento}>+ Adicionar ao Orçamento</ActionButton>
             </Actions>
           </>
         )}
