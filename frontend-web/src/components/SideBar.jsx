@@ -64,7 +64,7 @@ function Sidebar({ onLogout }) {
 
       <MenuItem isOpen={isOpen} onClick={() => navigate("/dashboard")}>
         <FaChartPie />
-        <span>Dashboard</span>
+        <span>Início</span>
       </MenuItem>
 
       <MenuItem isOpen={isOpen} onClick={() => navigate("/cupom")}>

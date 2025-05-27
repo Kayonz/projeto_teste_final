@@ -1,19 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styled from "styled-components";
-import Sidebar from "../components/SideBar";
 import { useNavigate } from "react-router-dom";
+import Sidebar from "../components/SideBar";
 
 const Page = styled.div`
   display: flex;
   height: 100vh;
   width: 100vw;
   background-color: #1c1c3c;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
 `;
 
 const MainContent = styled.div`
@@ -24,78 +18,30 @@ const MainContent = styled.div`
   justify-content: center;
   align-items: center;
   width: 100%;
-
-  @media (max-width: 768px) {
-    padding: 1rem;
-  }
 `;
 
 const Card = styled.div`
   background-color: white;
   padding: 2rem 3rem;
   border-radius: 12px;
-  box-shadow: 0px 0px 15px rgba(0,0,0,0.1);
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 600px;
-
-  @media (max-width: 768px) {
-    padding: 1.5rem;
-    max-width: 90%;
-  }
 `;
 
 const Title = styled.h2`
   margin-bottom: 1rem;
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   color: #25267e;
   text-align: center;
-
-  @media (max-width: 480px) {
-    font-size: 1.5rem;
-  }
 `;
 
-const FileInputWrapper = styled.label`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 16px;
-  background-color: #25267e;
-  color: white;
-  font-weight: bold;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: center;
+const Select = styled.select`
   width: 100%;
-  max-width: 250px;
-  margin: 0 auto 16px auto;
-
-  &:hover {
-    background-color: #1c1c5a;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
-
-  @media (max-width: 480px) {
-    max-width: 100%;
-  }
-`;
-
-const HiddenInput = styled.input`
-  display: none;
-`;
-
-const FileName = styled.p`
-  margin-top: 10px;
-  font-size: 14px;
-  color: #25267e;
-  text-align: center;
-  word-break: break-all;
+  padding: 10px;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
 `;
 
 const Button = styled.button`
@@ -107,65 +53,79 @@ const Button = styled.button`
   border-radius: 6px;
   cursor: pointer;
   width: 100%;
-  margin-top: 10px;
 
   &:disabled {
     background-color: #aaa;
     cursor: not-allowed;
   }
+`;
 
-  @media (max-width: 480px) {
-    padding: 0.8rem;
+const FileInputWrapper = styled.label`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  margin: 0 auto 16px auto;
+  background-color: #25267e;
+  color: white;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+  width: 100%;
+  max-width: 250px;
+
+  &:hover {
+    background-color: #1c1c5a;
   }
+`;
+
+const HiddenInput = styled.input`
+  display: none;
 `;
 
 const ErrorText = styled.p`
   color: red;
   margin-top: 1rem;
-  text-align: center;
 `;
 
 const ResultSection = styled.div`
   margin-top: 1.5rem;
-
-  h3 {
-    color: #25267e;
-    margin-bottom: 0.5rem;
-    text-align: center;
-  }
-
-  ul {
-    list-style-type: none;
-    padding: 0;
-  }
-
-  li {
-    background-color: #f1f1f1;
-    margin-bottom: 8px;
-    padding: 8px 12px;
-    border-radius: 8px;
-    color: #333;
-  }
 `;
 
-const SecondaryButton = styled(Button)`
-  background-color: transparent;
+const FileName = styled.p`
+  margin-top: 10px;
+  font-size: 14px;
   color: #25267e;
-  border: 2px solid #25267e;
-  margin-top: 8px;
-
-  &:hover {
-    background-color: #25267e;
-    color: white;
-  }
+  text-align: center;
 `;
-
 
 const CupomUploadForm = ({ onGastosAtualizados }) => {
   const [file, setFile] = useState(null);
+  const [categorias, setCategorias] = useState([]);
+  const [categoriaSelecionada, setCategoriaSelecionada] = useState("");
   const [loading, setLoading] = useState(false);
   const [resultado, setResultado] = useState(null);
   const [error, setError] = useState(null);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchCategorias = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const res = await fetch("http://localhost:5000/api/categorias", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        setCategorias(data);
+      } catch (err) {
+        console.error("Erro ao buscar categorias", err);
+      }
+    };
+
+    fetchCategorias();
+  }, []);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -174,13 +134,18 @@ const CupomUploadForm = ({ onGastosAtualizados }) => {
   };
 
   const handleUpload = async () => {
-    if (!file) return;
+    if (!file || !categoriaSelecionada) {
+      setError("Selecione uma categoria e um arquivo.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
       const formData = new FormData();
       formData.append("imagem", file);
+      formData.append("categoriaId", categoriaSelecionada); // Enviando categoria selecionada
 
       const token = localStorage.getItem("token");
 
@@ -195,27 +160,23 @@ const CupomUploadForm = ({ onGastosAtualizados }) => {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.message || "Erro ao processar cupom.");
+        setError(data.message || "Erro ao processar cupom");
         setLoading(false);
         return;
       }
 
       setResultado(data);
 
-      // Atualiza os gastos no Dashboard (se foi passado como prop)
       if (typeof onGastosAtualizados === "function") {
         onGastosAtualizados();
       }
-
     } catch (err) {
       console.error(err);
-      setError("Erro ao enviar o cupom.");
+      setError("Erro ao enviar o cupom");
     }
 
     setLoading(false);
   };
-
-  const navigate = useNavigate();
 
   return (
     <Page>
@@ -224,19 +185,32 @@ const CupomUploadForm = ({ onGastosAtualizados }) => {
         <Card>
           <Title>Leitura de Cupom Fiscal</Title>
 
+          <Select
+            value={categoriaSelecionada}
+            onChange={(e) => setCategoriaSelecionada(e.target.value)}
+          >
+            <option value="">Selecione uma Categoria</option>
+            {categorias.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.nome}
+              </option>
+            ))}
+          </Select>
+
           <FileInputWrapper>
-            {file ? "Arquivo Selecionado" : "Selecionar Arquivo"}
+            {file ? file.name : "Selecionar Arquivo"}
             <HiddenInput type="file" onChange={handleFileChange} />
           </FileInputWrapper>
 
-          {file && <FileName>📄 {file.name}</FileName>}
+          {file && <FileName>Arquivo: {file.name}</FileName>}
 
           <Button onClick={handleUpload} disabled={loading || !file}>
             {loading ? "Processando..." : "Ler Cupom"}
           </Button>
-          <SecondaryButton onClick={() => navigate("/categorias")}>
-              Ver Categorias
-          </SecondaryButton>
+
+          <Button onClick={() => navigate("/categorias")} style={{ marginTop: "10px" }}>
+            Ver Categorias
+          </Button>
 
           {error && <ErrorText>{error}</ErrorText>}
 
