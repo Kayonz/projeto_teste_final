@@ -1,9 +1,22 @@
 import styled from "styled-components";
-import CategoriasView from "./CategoriasView";
 import Sidebar from "../components/SideBar.jsx";
 import { useEffect, useState } from "react";
-import CupomUploadForm from "./CupomUploadForm.jsx";
 import { useNavigate } from "react-router-dom";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Legend,
+} from "recharts";
+
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#845EC2", "#D65DB1"];
 
 const Container = styled.div`
   width: 100vw;
@@ -13,38 +26,11 @@ const Container = styled.div`
   font-family: "Montserrat", sans-serif;
   box-sizing: border-box;
   position: relative;
-  overflow: hidden;
-`;
-
-const Header = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  overflow-y: auto;
 `;
 
 const Title = styled.h1`
   color: #3f4872;
-`;
-
-const LogoutButton = styled.button`
-  background-color: rgb(74, 9, 179);
-  color: white;
-  padding: 10px 16px;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background-color: rgb(64, 5, 153);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
 `;
 
 const Cards = styled.div`
@@ -74,19 +60,32 @@ const CardValue = styled.p`
   color: #1ab188;
 `;
 
+const LogoutButton = styled.button`
+  background-color: rgb(74, 9, 179);
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: rgb(64, 5, 153);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+`;
+
 const Actions = styled.div`
   margin-top: 40px;
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
-`;
-
-const ContentWrapper = styled.div`
-  margin-left: 220px; /* mesma largura da Sidebar */
-  padding: 40px;
-  transition: margin-left 0.3s ease;
-  background-color: #eff0f9;
-  min-height: 100vh;
 `;
 
 const ActionButton = styled.button`
@@ -110,6 +109,13 @@ const ActionButton = styled.button`
   }
 `;
 
+const ContentWrapper = styled.div`
+  margin-left: 220px;
+  padding: 40px;
+  background-color: #eff0f9;
+  min-height: 100vh;
+`;
+
 const LogoutWrapper = styled.div`
   position: absolute;
   top: 20px;
@@ -118,74 +124,52 @@ const LogoutWrapper = styled.div`
 `;
 
 function DashboardPage() {
-  const [currentView, setCurrentView] = useState("dashboard");
-  const [orcamento, setOrcamento] = useState(0);
-  const [gastos, setGastos] = useState(0);
+  const [resumo, setResumo] = useState({});
+  const [gastosPorCategoria, setGastosPorCategoria] = useState([]);
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (!token) {
-      window.location.href = "/login";
+      navigate("/login");
       return;
     }
 
-    fetch("http://localhost:5000/api/orcamento", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Falha ao buscar orçamento");
-        return res.json();
-      })
-      .then((data) => {
-        setOrcamento(Number(data.orcamento) || 0);
-      })
-      .catch((err) => {
-        console.error(err);
-        setOrcamento(0);
-      });
-
-    fetchGastos();
+    fetchResumoFinanceiro();
+    fetchGastosPorCategoria();
   }, [token]);
 
-
-  useEffect(() => {
-    if (currentView === "dashboard") {
-      fetchGastos();
-    }
-  }, [currentView]);
-
-  const fetchGastos = () => {
-    fetch("http://localhost:5000/api/gastos-mes", {
+  const fetchResumoFinanceiro = () => {
+    fetch("http://localhost:5000/api/resumo-financeiro", {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((res) => {
-        if (!res.ok) throw new Error("Falha ao buscar gastos");
-        return res.json();
-      })
-      .then((data) => {
-        setGastos(Number(data.totalGastos) || 0);
-      })
-      .catch((err) => {
-        console.error(err);
-        setGastos(0);
-      });
+      .then((res) => res.json())
+      .then((data) => setResumo(data))
+      .catch((err) => console.error(err));
+  };
+
+  const fetchGastosPorCategoria = () => {
+    fetch("http://localhost:5000/api/gastos-por-categoria", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => setGastosPorCategoria(data))
+      .catch((err) => console.error(err));
   };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    window.location.href = "/login";
+    navigate("/login");
   };
 
   const handleSetOrcamento = () => {
-    const valorAdicionar = prompt("Digite o valor a adicionar ao orçamento:");
-
-    if (!valorAdicionar || isNaN(valorAdicionar)) {
+    const valor = prompt("Digite o valor a adicionar ao orçamento:");
+    if (!valor || isNaN(valor)) {
       alert("Valor inválido!");
       return;
     }
 
-    const valorSomado = orcamento + parseFloat(valorAdicionar);
+    const novoOrcamento = resumo.orcamento + parseFloat(valor);
 
     fetch("http://localhost:5000/api/orcamento", {
       method: "POST",
@@ -193,71 +177,90 @@ function DashboardPage() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ valor: valorSomado }),
+      body: JSON.stringify({ valor: novoOrcamento }),
     })
-      .then((res) => {
-        if (!res.ok) throw new Error("Erro ao atualizar orçamento");
-        return res.json();
-      })
+      .then((res) => res.json())
       .then(() => {
-        alert("Orçamento atualizado com sucesso");
-        setOrcamento(valorSomado);
+        alert("Orçamento atualizado!");
+        fetchResumoFinanceiro();
       })
-      .catch((err) => {
-        console.error(err);
-        alert("Erro ao atualizar orçamento");
-      });
+      .catch((err) => console.error(err));
   };
 
   const handleOpenCupom = () => {
-  navigate("/cupom");
-  };
-
-  const handleNavigation = (destino) => {
-    setCurrentView(destino);
+    navigate("/cupom");
   };
 
   return (
     <Container>
-      <Sidebar onNavigate={handleNavigation} onLogout={handleLogout} />
+      <Sidebar onLogout={handleLogout} onNavigate={() => {}} />
       <ContentWrapper>
-        {currentView === "dashboard" && (
-          <>
-            <LogoutWrapper>
-              <LogoutButton onClick={handleLogout}>Fazer Logout</LogoutButton>
-            </LogoutWrapper>
+        <LogoutWrapper>
+          <LogoutButton onClick={handleLogout}>Fazer Logout</LogoutButton>
+        </LogoutWrapper>
 
-            <Title>Olá, bem-vindo!</Title>
+        <Title>Dashboard Financeiro</Title>
 
-            <Cards>
-              <Card>
-                <CardTitle>Disponível</CardTitle>
-                <CardValue>
-                  R$ {(orcamento - gastos).toFixed(2)}
-                </CardValue>
-              </Card>
+        <Cards>
+          <Card>
+            <CardTitle>Saldo Disponível</CardTitle>
+            <CardValue>R$ {(resumo.saldo || 0).toFixed(2)}</CardValue>
+          </Card>
+          <Card>
+            <CardTitle>Gastos do mês</CardTitle>
+            <CardValue>R$ {(resumo.gastos || 0).toFixed(2)}</CardValue>
+          </Card>
+          <Card>
+            <CardTitle>Orçamento Total</CardTitle>
+            <CardValue>R$ {(resumo.orcamento || 0).toFixed(2)}</CardValue>
+          </Card>
+          <Card>
+            <CardTitle>Percentual Gasto</CardTitle>
+            <CardValue>{resumo.percentualGasto || 0}%</CardValue>
+          </Card>
+        </Cards>
 
-              <Card>
-                <CardTitle>Gastos do mês</CardTitle>
-                <CardValue>R$ {gastos.toFixed(2)}</CardValue>
-              </Card>
-            </Cards>
+        <Actions>
+          <ActionButton onClick={handleOpenCupom}>+ Ler Cupom Fiscal</ActionButton>
+          <ActionButton onClick={handleSetOrcamento}>+ Adicionar ao Orçamento</ActionButton>
+        </Actions>
 
-            <Actions>
-              <ActionButton onClick={handleOpenCupom}>+ Ler Cupom Fiscal</ActionButton>
-              <ActionButton onClick={handleSetOrcamento}>+ Adicionar ao Orçamento</ActionButton>
-            </Actions>
-          </>
-        )}
+        <h2 style={{ marginTop: "40px", color: "#3f4872" }}>Gastos por Categoria</h2>
+        <div style={{ width: "100%", height: 300 }}>
+          <ResponsiveContainer>
+            <PieChart>
+              <Pie
+                data={gastosPorCategoria}
+                dataKey="valor"
+                nameKey="categoria"
+                cx="50%"
+                cy="50%"
+                outerRadius={100}
+                label
+              >
+                {gastosPorCategoria.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
 
-        {currentView === "categorias" && <CategoriasView />}
-
-        {currentView === "gasto" && (
-          <CupomUploadForm
-            onGastosAtualizados={fetchGastos}
-            voltarDashboard={() => setCurrentView("dashboard")}
-          />
-        )}
+        <h2 style={{ marginTop: "40px", color: "#3f4872" }}>Histórico de Gastos</h2>
+        <div style={{ width: "100%", height: 300 }}>
+          <ResponsiveContainer>
+            <BarChart data={gastosPorCategoria}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="categoria" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="valor" fill="#25267e" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </ContentWrapper>
     </Container>
   );

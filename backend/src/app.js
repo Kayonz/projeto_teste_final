@@ -20,6 +20,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/financeiro', financeiroRoutes);
 app.use('/api/orcamento', orcamentoRoutes);
 app.use('/api', orcRoutes);
+app.use('/api/auth/me', authRoutes);
 
 app.get('/', (req, res) => {
   res.send('API Finance funcionando!');
