@@ -19,6 +19,10 @@ export const processarCupom = async (req, res) => {
 
     const produtos = extrairProdutos(text);
 
+    if (produtos.length === 0) {
+      return res.status(400).json({ message: 'Nenhum produto encontrado no cupom' });
+    }
+
     for (const item of produtos) {
       const categoriaNome = detectarCategoria(item.nome);
 
@@ -44,24 +48,39 @@ export const processarCupom = async (req, res) => {
   }
 };
 
-// Função para extrair nome e valor de cada item do texto do cupom
+// 🔍 Função aprimorada para extrair nome e valor, considerando linhas separadas
 function extrairProdutos(texto) {
-  const linhas = texto.split('\n');
-  return linhas
-    .filter((linha) => /\d+,\d{2}/.test(linha))
-    .map((linha) => {
-      const match = linha.match(/(.+?)\s+(\d+,\d{2})/);
-      if (!match) return null;
+  const linhas = texto.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  const produtos = [];
 
-      return {
-        nome: match[1].trim(),
-        valor: parseFloat(match[2].replace(',', '.')),
-      };
-    })
-    .filter(Boolean);
+  for (let i = 0; i < linhas.length; i++) {
+    const linha = linhas[i];
+
+    // Verifica se a linha tem um valor monetário, ex: "9,28"
+    const valorMatch = linha.match(/(\d{1,3},\d{2})/);
+    if (valorMatch) {
+      const valor = parseFloat(valorMatch[1].replace(',', '.'));
+
+      // Nome do produto: verifica se está na linha anterior ou na mesma linha
+      let nome = '';
+
+      const linhaAnterior = linhas[i - 1] || '';
+      const nomeMatchAnterior = linhaAnterior.match(/[A-Za-zçÇãÃéÉíÍêÊôÔ\s]{3,}/);
+      if (nomeMatchAnterior) {
+        nome = nomeMatchAnterior[0].trim();
+      } else {
+        const nomeMatch = linha.match(/[A-Za-zçÇãÃéÉíÍêÊôÔ\s]{3,}/);
+        nome = nomeMatch ? nomeMatch[0].trim() : 'Produto';
+      }
+
+      produtos.push({ nome, valor });
+    }
+  }
+
+  return produtos;
 }
 
-// Função para detectar categoria com base no nome do produto
+// 🎯 Categorização simples baseada no nome
 function detectarCategoria(nome) {
   const nomeMin = nome.toLowerCase();
   if (nomeMin.includes('arroz') || nomeMin.includes('carne')) return 'Alimentação';

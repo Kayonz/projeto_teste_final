@@ -1,68 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Sidebar from "../components/SideBar";
 import { useNavigate } from "react-router-dom";
-
-const Container = styled.div`
-  width: 100vw;
-  height: 100vh;
-  background-color: #eff0f9;
-  font-family: "Montserrat", sans-serif;
-  display: flex;
-`;
-
-const ContentWrapper = styled.div`
-  margin-left: 220px; /* largura da Sidebar */
-  padding: 40px;
-  background-color: #eff0f9;
-  width: 100%;
-  min-height: 100vh;
-`;
-
-const Title = styled.h1`
-  color: #3f4872;
-  margin-bottom: 20px;
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  max-width: 400px;
-`;
-
-const Label = styled.label`
-  font-weight: bold;
-  color: #3f4872;
-`;
-
-const Input = styled.input`
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 1rem;
-`;
-
-const Button = styled.button`
-  background-color: #3f4872;
-  color: white;
-  padding: 12px;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background-color: #505c8c;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
-`;
 
 function EditarPerfil() {
   const navigate = useNavigate();
@@ -72,58 +11,96 @@ function EditarPerfil() {
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [fotoPerfil, setFotoPerfil] = useState(null);
+  const [previewFoto, setPreviewFoto] = useState(null);
+  const [fotoAtualUrl, setFotoAtualUrl] = useState(null);
+  const [erro, setErro] = useState("");
 
-  const handleNavigation = (destino) => {
-    navigate(`/${destino}`);
-  };
+  // Pega token do localStorage
+  const token = localStorage.getItem("token");
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/");
-  };
+  useEffect(() => {
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    // Buscar dados do perfil no backend
+    fetch("http://localhost:5000/api/auth/me", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Erro ao carregar perfil");
+        return res.json();
+      })
+      .then((data) => {
+        setNome(data.user.nome);
+        setEmail(data.user.email);
+        setFotoAtualUrl(`http://localhost:5000/uploads/${data.user.foto_url}`);
+      })
+      .catch(() => {
+        alert("Falha ao carregar perfil, faça login novamente");
+        localStorage.removeItem("token");
+        navigate("/login");
+      });
+  }, [token, navigate]);
+
+  // Atualiza preview da foto ao mudar fotoPerfil
+  useEffect(() => {
+    if (!fotoPerfil) {
+      setPreviewFoto(null);
+      return;
+    }
+    const objectUrl = URL.createObjectURL(fotoPerfil);
+    setPreviewFoto(objectUrl);
+
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [fotoPerfil]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // lógica de envio para o backend
+    setErro("");
+
+    if ((senha || confirmarSenha) && senha !== confirmarSenha) {
+      setErro("As senhas não coincidem.");
+      return;
+    }
+    if (senha && senha.length < 6) {
+      setErro("A senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("nome", nome);
+    formData.append("email", email);
+    if (senha) formData.append("senha", senha);
+    if (fotoPerfil) formData.append("fotoPerfil", fotoPerfil);
+
+    fetch("http://localhost:5000/api/auth/me", {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Erro ao atualizar perfil");
+        return res.json();
+      })
+      .then((data) => {
+        alert("Perfil atualizado com sucesso!");
+        // Atualiza foto atual
+        setFotoAtualUrl(`http://localhost:5000/uploads/${data.user.foto_url}`);
+        setSenha("");
+        setConfirmarSenha("");
+        setFotoPerfil(null);
+        setPreviewFoto(null);
+      })
+      .catch(() => {
+        setErro("Erro ao atualizar perfil");
+      });
   };
 
-  return (
-    <Container>
-      <Sidebar onNavigate={handleNavigation} onLogout={handleLogout} />
-      <ContentWrapper>
-        <Title>Editar Perfil</Title>
-        <Form onSubmit={handleSubmit}>
-          <Label>Nome</Label>
-          <Input value={nome} onChange={(e) => setNome(e.target.value)} />
-
-          <Label>E-mail</Label>
-          <Input value={email} onChange={(e) => setEmail(e.target.value)} />
-
-          <Label>Nova Senha</Label>
-          <Input
-            type="password"
-            value={senha}
-            onChange={(e) => setSenha(e.target.value)}
-          />
-
-          <Label>Confirmar Nova Senha</Label>
-          <Input
-            type="password"
-            value={confirmarSenha}
-            onChange={(e) => setConfirmarSenha(e.target.value)}
-          />
-
-          <Label>Foto de Perfil</Label>
-          <Input
-            type="file"
-            onChange={(e) => setFotoPerfil(e.target.files[0])}
-          />
-
-          <Button type="submit">Salvar</Button>
-        </Form>
-      </ContentWrapper>
-    </Container>
-  );
+  // ... aqui o restante do componente (renderização igual você já tinha)
 }
 
 export default EditarPerfil;
