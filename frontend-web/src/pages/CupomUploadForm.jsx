@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/SideBar";
 
 const Page = styled.div`
@@ -7,13 +8,6 @@ const Page = styled.div`
   height: 100vh;
   width: 100vw;
   background-color: #1c1c3c;
-  flex-direction: column;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
 `;
 
 const MainContent = styled.div`
@@ -24,45 +18,30 @@ const MainContent = styled.div`
   justify-content: center;
   align-items: center;
   width: 100%;
-
-  @media (max-width: 768px) {
-    padding: 1rem;
-    flex-direction: column;
-  }
 `;
 
 const Card = styled.div`
   background-color: white;
   padding: 2rem 3rem;
   border-radius: 12px;
-  box-shadow: 0px 0px 15px rgba(0,0,0,0.1);
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 600px;
-
-  @media (max-width: 768px) {
-    padding: 1.5rem;
-    max-width: 90%;
-  }
 `;
 
 const Title = styled.h2`
   margin-bottom: 1rem;
   font-size: 1.5rem;
-  color:rgb(37, 2, 2);
+  color: #25267e;
   text-align: center;
-
-  @media (max-width: 480px) {
-    font-size: 1.3rem;
-  }
 `;
 
-const Input = styled.input`
-  margin-right: 1rem;
+const Select = styled.select`
   width: 100%;
-
-  @media (max-width: 480px) {
-    margin-bottom: 10px;
-  }
+  padding: 10px;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
 `;
 
 const Button = styled.button`
@@ -79,10 +58,30 @@ const Button = styled.button`
     background-color: #aaa;
     cursor: not-allowed;
   }
+`;
 
-  @media (max-width: 480px) {
-    padding: 0.8rem;
+const FileInputWrapper = styled.label`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  margin: 0 auto 16px auto;
+  background-color: #25267e;
+  color: white;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+  width: 100%;
+  max-width: 250px;
+
+  &:hover {
+    background-color: #1c1c5a;
   }
+`;
+
+const HiddenInput = styled.input`
+  display: none;
 `;
 
 const ErrorText = styled.p`
@@ -92,47 +91,6 @@ const ErrorText = styled.p`
 
 const ResultSection = styled.div`
   margin-top: 1.5rem;
-
-  @media (max-width: 480px) {
-    text-align: center;
-  }
-`;
-
-const FileInputWrapper = styled.label`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 16px;
-  margin: 0 auto 16px auto; 
-  margin-bottom: 16px;
-  background-color: #25267e;
-  color: white;
-  font-weight: bold;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: center;
-  width: 100%;
-  max-width: 250px;
-
-  &:hover {
-    background-color: #1c1c5a;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    color:rgb(255, 255, 255);
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
-
-  @media (max-width: 480px) {
-    max-width: 100%;
-  }
-`;
-
-const HiddenInput = styled.input`
-  display: none;
 `;
 
 const FileName = styled.p`
@@ -142,12 +100,32 @@ const FileName = styled.p`
   text-align: center;
 `;
 
-
 const CupomUploadForm = ({ onGastosAtualizados }) => {
   const [file, setFile] = useState(null);
+  const [categorias, setCategorias] = useState([]);
+  const [categoriaSelecionada, setCategoriaSelecionada] = useState("");
   const [loading, setLoading] = useState(false);
   const [resultado, setResultado] = useState(null);
   const [error, setError] = useState(null);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchCategorias = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const res = await fetch("http://localhost:5000/api/categorias", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        setCategorias(data);
+      } catch (err) {
+        console.error("Erro ao buscar categorias", err);
+      }
+    };
+
+    fetchCategorias();
+  }, []);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -155,15 +133,19 @@ const CupomUploadForm = ({ onGastosAtualizados }) => {
     setError(null);
   };
 
-
   const handleUpload = async () => {
-    if (!file) return;
+    if (!file || !categoriaSelecionada) {
+      setError("Selecione uma categoria e um arquivo.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
       const formData = new FormData();
       formData.append("imagem", file);
+      formData.append("categoriaId", categoriaSelecionada); // Enviando categoria selecionada
 
       const token = localStorage.getItem("token");
 
@@ -185,11 +167,9 @@ const CupomUploadForm = ({ onGastosAtualizados }) => {
 
       setResultado(data);
 
-      // Atualiza gastos no Dashboard (estado no DashboardPage)
       if (typeof onGastosAtualizados === "function") {
         onGastosAtualizados();
       }
-
     } catch (err) {
       console.error(err);
       setError("Erro ao enviar o cupom");
@@ -204,7 +184,19 @@ const CupomUploadForm = ({ onGastosAtualizados }) => {
       <MainContent>
         <Card>
           <Title>Leitura de Cupom Fiscal</Title>
-          
+
+          <Select
+            value={categoriaSelecionada}
+            onChange={(e) => setCategoriaSelecionada(e.target.value)}
+          >
+            <option value="">Selecione uma Categoria</option>
+            {categorias.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.nome}
+              </option>
+            ))}
+          </Select>
+
           <FileInputWrapper>
             {file ? file.name : "Selecionar Arquivo"}
             <HiddenInput type="file" onChange={handleFileChange} />
@@ -216,8 +208,12 @@ const CupomUploadForm = ({ onGastosAtualizados }) => {
             {loading ? "Processando..." : "Ler Cupom"}
           </Button>
 
+          <Button onClick={() => navigate("/categorias")} style={{ marginTop: "10px" }}>
+            Ver Categorias
+          </Button>
+
           {error && <ErrorText>{error}</ErrorText>}
-          
+
           {resultado && resultado.produtos && (
             <ResultSection>
               <h3>Itens encontrados:</h3>

@@ -230,13 +230,13 @@ function LoginRegisterPage() {
     <PageContainer>
       <LeftPanel>
         <MainTitle>Finance Soft</MainTitle>
-        <Subtitle>Tire foto do seu cupom e veja quanto gastou!</Subtitle>
+        <Subtitle>Encurtando seu tempo e suas finanças!</Subtitle>
       </LeftPanel>
 
       <RightPanel>
         <LoginTitle>{isLogin ? "Login" : "Cadastro"}</LoginTitle>
 
-        <Subtitle>Bem-vindo ao Finance Soft</Subtitle>
+        <Subtitle>Bem-vindo ao Finance Soft.</Subtitle>
 
         <Form onSubmit={handleSubmit}>
           {!isLogin && (

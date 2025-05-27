@@ -1,36 +1,39 @@
-// controllers/orcamentoController.js
 import pool from '../config/database.js';
 
-export const getOrcamento = async (req, res) => {
+export const getResumoFinanceiro = async (req, res) => {
+  const userId = req.userId;
+
   try {
-    const userId = req.userId; 
-    const result = await pool.query('SELECT valor FROM orcamento WHERE user_id = $1', [userId]);
+    const [orcamentoResult, gastoResult, categoriasResult, quantidadeGastosResult] = await Promise.all([
+      pool.query('SELECT SUM(limite) as total_orcamento FROM categorias WHERE usuario_id = $1', [userId]),
+      pool.query(`
+        SELECT SUM(valor) as total_gastos 
+        FROM gastos 
+        WHERE usuario_id = $1 
+        AND DATE_TRUNC('month', data_compra) = DATE_TRUNC('month', CURRENT_DATE)
+      `, [userId]),
+      pool.query('SELECT COUNT(*) as total_categorias FROM categorias WHERE usuario_id = $1', [userId]),
+      pool.query('SELECT COUNT(*) as total_gastos FROM gastos WHERE usuario_id = $1', [userId]),
+    ]);
 
-    if (result.rows.length === 0) {
-      return res.json({ orcamento: 0 });
-    }
+    const orcamento = parseFloat(orcamentoResult.rows[0].total_orcamento || 0);
+    const gastos = parseFloat(gastoResult.rows[0].total_gastos || 0);
+    const totalCategorias = parseInt(categoriasResult.rows[0].total_categorias || 0);
+    const quantidadeGastos = parseInt(quantidadeGastosResult.rows[0].total_gastos || 0);
 
-    res.json({ orcamento: result.rows[0].valor });
-  } catch (err) {
-    res.status(500).json({ message: 'Erro ao buscar orçamento' });
-  }
-};
+    const saldo = orcamento - gastos;
+    const percentualGasto = orcamento > 0 ? ((gastos / orcamento) * 100).toFixed(2) : 0;
 
-export const salvarOrcamento = async (req, res) => {
-  try {
-    const userId = req.userId;  // idem aqui
-    const { valor } = req.body;
-
-    const result = await pool.query('SELECT * FROM orcamento WHERE user_id = $1', [userId]);
-
-    if (result.rows.length > 0) {
-      await pool.query('UPDATE orcamento SET valor = $1 WHERE user_id = $2', [valor, userId]);
-    } else {
-      await pool.query('INSERT INTO orcamento (user_id, valor) VALUES ($1, $2)', [userId, valor]);
-    }
-
-    res.json({ message: 'Orçamento salvo com sucesso' });
-  } catch (err) {
-    res.status(500).json({ message: 'Erro ao salvar orçamento' });
+    res.json({
+      orcamento,
+      gastos, // agora é só do mês atual 💰
+      saldo,
+      percentualGasto: Number(percentualGasto), // em %
+      totalCategorias,
+      quantidadeGastos,
+    });
+  } catch (error) {
+    console.error("Erro ao buscar resumo financeiro:", error);
+    res.status(500).json({ message: "Erro ao buscar resumo financeiro" });
   }
 };
