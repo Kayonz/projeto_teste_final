@@ -1,13 +1,13 @@
 import { useState } from "react";
 import styled from "styled-components";
 import Sidebar from "../components/SideBar";
+import { useNavigate } from "react-router-dom";
 
 const Page = styled.div`
   display: flex;
   height: 100vh;
   width: 100vw;
   background-color: #1c1c3c;
-  flex-direction: column;
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -27,7 +27,6 @@ const MainContent = styled.div`
 
   @media (max-width: 768px) {
     padding: 1rem;
-    flex-direction: column;
   }
 `;
 
@@ -47,54 +46,12 @@ const Card = styled.div`
 
 const Title = styled.h2`
   margin-bottom: 1rem;
-  font-size: 1.5rem;
-  color:rgb(37, 2, 2);
+  font-size: 1.8rem;
+  color: #25267e;
   text-align: center;
 
   @media (max-width: 480px) {
-    font-size: 1.3rem;
-  }
-`;
-
-const Input = styled.input`
-  margin-right: 1rem;
-  width: 100%;
-
-  @media (max-width: 480px) {
-    margin-bottom: 10px;
-  }
-`;
-
-const Button = styled.button`
-  font-weight: bold;
-  background-color: #25267e;
-  color: white;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  width: 100%;
-
-  &:disabled {
-    background-color: #aaa;
-    cursor: not-allowed;
-  }
-
-  @media (max-width: 480px) {
-    padding: 0.8rem;
-  }
-`;
-
-const ErrorText = styled.p`
-  color: red;
-  margin-top: 1rem;
-`;
-
-const ResultSection = styled.div`
-  margin-top: 1.5rem;
-
-  @media (max-width: 480px) {
-    text-align: center;
+    font-size: 1.5rem;
   }
 `;
 
@@ -103,8 +60,6 @@ const FileInputWrapper = styled.label`
   align-items: center;
   justify-content: center;
   padding: 10px 16px;
-  margin: 0 auto 16px auto; 
-  margin-bottom: 16px;
   background-color: #25267e;
   color: white;
   font-weight: bold;
@@ -114,12 +69,12 @@ const FileInputWrapper = styled.label`
   text-align: center;
   width: 100%;
   max-width: 250px;
+  margin: 0 auto 16px auto;
 
   &:hover {
     background-color: #1c1c5a;
     transform: translateY(-2px);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    color:rgb(255, 255, 255);
   }
 
   &:active {
@@ -140,6 +95,69 @@ const FileName = styled.p`
   font-size: 14px;
   color: #25267e;
   text-align: center;
+  word-break: break-all;
+`;
+
+const Button = styled.button`
+  font-weight: bold;
+  background-color: #25267e;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 10px;
+
+  &:disabled {
+    background-color: #aaa;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.8rem;
+  }
+`;
+
+const ErrorText = styled.p`
+  color: red;
+  margin-top: 1rem;
+  text-align: center;
+`;
+
+const ResultSection = styled.div`
+  margin-top: 1.5rem;
+
+  h3 {
+    color: #25267e;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+
+  li {
+    background-color: #f1f1f1;
+    margin-bottom: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: #333;
+  }
+`;
+
+const SecondaryButton = styled(Button)`
+  background-color: transparent;
+  color: #25267e;
+  border: 2px solid #25267e;
+  margin-top: 8px;
+
+  &:hover {
+    background-color: #25267e;
+    color: white;
+  }
 `;
 
 
@@ -154,7 +172,6 @@ const CupomUploadForm = ({ onGastosAtualizados }) => {
     setResultado(null);
     setError(null);
   };
-
 
   const handleUpload = async () => {
     if (!file) return;
@@ -178,25 +195,27 @@ const CupomUploadForm = ({ onGastosAtualizados }) => {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.message || "Erro ao processar cupom");
+        setError(data.message || "Erro ao processar cupom.");
         setLoading(false);
         return;
       }
 
       setResultado(data);
 
-      // Atualiza gastos no Dashboard (estado no DashboardPage)
+      // Atualiza os gastos no Dashboard (se foi passado como prop)
       if (typeof onGastosAtualizados === "function") {
         onGastosAtualizados();
       }
 
     } catch (err) {
       console.error(err);
-      setError("Erro ao enviar o cupom");
+      setError("Erro ao enviar o cupom.");
     }
 
     setLoading(false);
   };
+
+  const navigate = useNavigate();
 
   return (
     <Page>
@@ -204,20 +223,23 @@ const CupomUploadForm = ({ onGastosAtualizados }) => {
       <MainContent>
         <Card>
           <Title>Leitura de Cupom Fiscal</Title>
-          
+
           <FileInputWrapper>
-            {file ? file.name : "Selecionar Arquivo"}
+            {file ? "Arquivo Selecionado" : "Selecionar Arquivo"}
             <HiddenInput type="file" onChange={handleFileChange} />
           </FileInputWrapper>
 
-          {file && <FileName>Arquivo: {file.name}</FileName>}
+          {file && <FileName>📄 {file.name}</FileName>}
 
           <Button onClick={handleUpload} disabled={loading || !file}>
             {loading ? "Processando..." : "Ler Cupom"}
           </Button>
+          <SecondaryButton onClick={() => navigate("/categorias")}>
+              Ver Categorias
+          </SecondaryButton>
 
           {error && <ErrorText>{error}</ErrorText>}
-          
+
           {resultado && resultado.produtos && (
             <ResultSection>
               <h3>Itens encontrados:</h3>
