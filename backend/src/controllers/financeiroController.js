@@ -23,12 +23,12 @@ export const getResumoFinanceiro = async (req, res) => {
       orcamento,
       gastos,
       saldo,
-      percentualGasto: Number(percentualGasto), // em %
+      percentualGasto: Number(percentualGasto),
       totalCategorias,
       quantidadeGastos,
     });
   } catch (error) {
-    console.error("Erro ao buscar resumo financeiro:", error);
-    res.status(500).json({ message: "Erro ao buscar resumo financeiro" });
+    console.error('Erro ao buscar resumo financeiro:', error);
+    res.status(500).json({ message: 'Erro ao buscar resumo financeiro' });
   }
 };

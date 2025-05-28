@@ -3,6 +3,83 @@ import styled from "styled-components";
 import Sidebar from "../components/SideBar";
 import { useNavigate } from "react-router-dom";
 
+
+const Container = styled.div`
+  display: flex;
+  height: 100vh;
+`;
+
+const Content = styled.div`
+  flex: 1;
+  padding: 40px 60px;
+  overflow-y: auto;
+  color: white;
+`;
+
+const Title = styled.h2`
+  margin-bottom: 30px;
+  color: #25267e;
+`;
+
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  color: #25267e;
+`;
+
+const Label = styled.label`
+  font-weight: 600;
+`;
+
+const Input = styled.input`
+  padding: 10px 14px;
+  border: 1.8px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+  background-color: #fff;
+  outline-offset: 2px;
+  transition: border-color 0.2s ease-in-out;
+
+  &:focus {
+    border-color: #25267e;
+  }
+`;
+
+const ErrorMsg = styled.p`
+  color: #e53935;
+  margin-top: -10px;
+  margin-bottom: 10px;
+  font-weight: 600;
+`;
+
+const Button = styled.button`
+  margin-top: 10px;
+  background-color: #25267e;
+  color: #eff0f9;
+  font-weight: 700;
+  padding: 12px 0;
+  border-radius: 10px;
+  cursor: pointer;
+  border: none;
+  font-size: 18px;
+  transition: background-color 0.2s ease-in-out;
+
+  &:hover {
+    background-color: #1a1c5b;
+  }
+`;
+
+const FotoPreview = styled.img`
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-top: 10px;
+  border: 1.8px solid #25267e;
+`;
+
+
 function EditarPerfil() {
   const navigate = useNavigate();
 
@@ -15,7 +92,6 @@ function EditarPerfil() {
   const [fotoAtualUrl, setFotoAtualUrl] = useState(null);
   const [erro, setErro] = useState("");
 
-  // Pega token do localStorage
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -24,7 +100,6 @@ function EditarPerfil() {
       return;
     }
 
-    // Buscar dados do perfil no backend
     fetch("http://localhost:5000/api/auth/me", {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -44,7 +119,6 @@ function EditarPerfil() {
       });
   }, [token, navigate]);
 
-  // Atualiza preview da foto ao mudar fotoPerfil
   useEffect(() => {
     if (!fotoPerfil) {
       setPreviewFoto(null);
@@ -88,7 +162,6 @@ function EditarPerfil() {
       })
       .then((data) => {
         alert("Perfil atualizado com sucesso!");
-        // Atualiza foto atual
         setFotoAtualUrl(`http://localhost:5000/uploads/${data.user.foto_url}`);
         setSenha("");
         setConfirmarSenha("");
@@ -100,7 +173,53 @@ function EditarPerfil() {
       });
   };
 
-  // ... aqui o restante do componente (renderização igual você já tinha)
+  return (
+    <Container>
+      <Sidebar />
+      <Content>
+        <Title>Editar Perfil</Title>
+        <Form onSubmit={handleSubmit}>
+          <Label>Nome</Label>
+          <Input value={nome} onChange={(e) => setNome(e.target.value)} required />
+
+          <Label>Email</Label>
+          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+
+          <Label>Senha</Label>
+          <Input
+            type="password"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            placeholder="Deixe em branco para manter"
+          />
+
+          <Label>Confirmar Senha</Label>
+          <Input
+            type="password"
+            value={confirmarSenha}
+            onChange={(e) => setConfirmarSenha(e.target.value)}
+            placeholder="Confirme a senha"
+          />
+
+          <Label>Foto de Perfil</Label>
+          <Input
+            type="file"
+            onChange={(e) => setFotoPerfil(e.target.files[0])}
+            accept="image/*"
+          />
+          {previewFoto ? (
+            <FotoPreview src={previewFoto} alt="Preview da foto" />
+          ) : fotoAtualUrl ? (
+            <FotoPreview src={fotoAtualUrl} alt="Foto atual" />
+          ) : null}
+
+          {erro && <ErrorMsg>{erro}</ErrorMsg>}
+
+          <Button type="submit">Salvar</Button>
+        </Form>
+      </Content>
+    </Container>
+  );
 }
 
 export default EditarPerfil;
