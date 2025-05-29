@@ -6,7 +6,6 @@ body, html {
   font-family: "Montserrat", sans-serif;
   height: 100%;
   margin: 0;
-  background-color: #1a1a2e; /* A cor desejada */
   display: flex;
   align-items: center;
   justify-content: center;

@@ -1,44 +1,61 @@
-  import pool from '../config/database.js';
+import pool from '../config/database.js';
 
+// Pega todas as categorias do usuário logado
+export const getCategorias = async (req, res) => {
+  const userId = req.userId; // ou req.user.id, conforme seu middleware
 
-  export const getCategorias = async (req, res) => {
-    const userId = req.userId;
+  try {
+    const result = await pool.query(
+      'SELECT id, nome, limite FROM categorias WHERE usuario_id = $1',
+      [userId]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Erro ao buscar categorias:', error);
+    res.status(500).json({ message: 'Erro ao buscar categorias' });
+  }
+};
 
-    try {
-      const result = await pool.query(
-        'SELECT id, nome, limite FROM categorias WHERE usuario_id = $1',
-        [userId]
-      );
-      res.json(result.rows);
-    } catch (error) {
-      console.error('Erro ao buscar categorias:', error);
-      res.status(500).json({ message: 'Erro ao buscar categorias' });
-    }
-  };
-
-
-  export const updateCategoria = async (req, res) => {
+// Atualiza limite da categoria
+export const updateCategoria = async (req, res) => {
+  try {
     const userId = req.userId;
     const categoriaId = req.params.id;
     const { limite } = req.body;
 
-    try {
-      const check = await pool.query(
-        'SELECT * FROM categorias WHERE id = $1 AND usuario_id = $2',
-        [categoriaId, userId]
-      );
-      if (check.rowCount === 0) {
-        return res.status(404).json({ message: 'Categoria não encontrada ou não pertence ao usuário' });
-      }
+    const result = await pool.query(
+      'UPDATE categorias SET limite = $1 WHERE id = $2 AND usuario_id = $3 RETURNING *',
+      [limite, categoriaId, userId]
+    );
 
-      await pool.query(
-        'UPDATE categorias SET limite = $1 WHERE id = $2',
-        [limite, categoriaId]
-      );
-
-      res.json({ message: 'Limite atualizado com sucesso' });
-    } catch (error) {
-      console.error('Erro ao atualizar categoria:', error);
-      res.status(500).json({ message: 'Erro interno do servidor' });
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Categoria não encontrada ou sem permissão' });
     }
-  };
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro ao atualizar categoria' });
+  }
+};
+
+// Pega os gastos de uma categoria específica para o usuário logado
+export const getGastosPorCategoria = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const categoriaId = req.params.id;
+
+    const result = await pool.query(
+      `SELECT descricao, valor, data_compra 
+       FROM gastos 
+       WHERE usuario_id = $1 AND categoria_id = $2
+       ORDER BY data_compra DESC`,
+      [userId, categoriaId]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro ao buscar gastos por categoria' });
+  }
+};

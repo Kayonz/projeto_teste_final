@@ -1,39 +1,38 @@
 import pool from '../config/database.js';
 
-export const getResumoFinanceiro = async (req, res) => {
+// Buscar orçamento total
+export const getOrcamento = async (req, res) => {
   const userId = req.userId;
 
   try {
-    const [orcamentoResult, gastoResult, categoriasResult, quantidadeGastosResult] = await Promise.all([
-      pool.query('SELECT SUM(limite) as total_orcamento FROM categorias WHERE usuario_id = $1', [userId]),
-      pool.query(`
-        SELECT SUM(valor) as total_gastos 
-        FROM gastos 
-        WHERE usuario_id = $1 
-        AND DATE_TRUNC('month', data_compra) = DATE_TRUNC('month', CURRENT_DATE)
-      `, [userId]),
-      pool.query('SELECT COUNT(*) as total_categorias FROM categorias WHERE usuario_id = $1', [userId]),
-      pool.query('SELECT COUNT(*) as total_gastos FROM gastos WHERE usuario_id = $1', [userId]),
-    ]);
+    const result = await pool.query(
+      'SELECT SUM(limite) as total_orcamento FROM categorias WHERE usuario_id = $1',
+      [userId]
+    );
 
-    const orcamento = parseFloat(orcamentoResult.rows[0].total_orcamento || 0);
-    const gastos = parseFloat(gastoResult.rows[0].total_gastos || 0);
-    const totalCategorias = parseInt(categoriasResult.rows[0].total_categorias || 0);
-    const quantidadeGastos = parseInt(quantidadeGastosResult.rows[0].total_gastos || 0);
-
-    const saldo = orcamento - gastos;
-    const percentualGasto = orcamento > 0 ? ((gastos / orcamento) * 100).toFixed(2) : 0;
-
-    res.json({
-      orcamento,
-      gastos, // agora é só do mês atual 💰
-      saldo,
-      percentualGasto: Number(percentualGasto), // em %
-      totalCategorias,
-      quantidadeGastos,
-    });
+    const orcamento = parseFloat(result.rows[0].total_orcamento) || 0;
+    res.json({ orcamento });
   } catch (error) {
-    console.error("Erro ao buscar resumo financeiro:", error);
-    res.status(500).json({ message: "Erro ao buscar resumo financeiro" });
+    console.error('Erro ao buscar orçamento:', error);
+    res.status(500).json({ message: 'Erro ao buscar orçamento' });
+  }
+};
+
+// Atualizar orçamento
+export const salvarOrcamento = async (req, res) => {
+  const userId = req.userId;
+  const { valor } = req.body;
+
+  try {
+    // Atualiza todas as categorias proporcionalmente, ou se quiser faz de outro jeito
+    await pool.query(
+      'UPDATE categorias SET limite = $1 WHERE usuario_id = $2',
+      [valor, userId]
+    );
+
+    res.json({ message: 'Orçamento atualizado com sucesso' });
+  } catch (error) {
+    console.error('Erro ao salvar orçamento:', error);
+    res.status(500).json({ message: 'Erro ao salvar orçamento' });
   }
 };

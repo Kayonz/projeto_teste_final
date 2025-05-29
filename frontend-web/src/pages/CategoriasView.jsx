@@ -26,12 +26,17 @@ const Title = styled.h2`
 const CategoriaItem = styled.div`
   background: white;
   padding: 16px;
-  border-radius: 10px;
-  margin-bottom: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  max-width: 400px;
+  max-width: 600px;
   user-select: none;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: scale(1.02);
+  }
 `;
 
 const Header = styled.div`
@@ -48,6 +53,7 @@ const CategoriaNome = styled.h3`
 const TotalGasto = styled.p`
   margin: 4px 0 0;
   font-weight: bold;
+  color: #333;
 `;
 
 const Setinha = styled.span`
@@ -57,7 +63,6 @@ const Setinha = styled.span`
   transform: rotate(${props => (props.aberto ? "180deg" : "0deg")});
 `;
 
-// Wrapper que controla a altura e animação de expansão
 const DetalhesWrapper = styled.div`
   overflow: hidden;
   max-height: ${props => (props.aberto ? `${props.contentHeight}px` : "0")};
@@ -68,16 +73,27 @@ const DetalhesContent = styled.div`
   padding-top: 12px;
   border-top: 1px solid #ccc;
   color: #555;
+
+  ul {
+    margin: 8px 0;
+    padding-left: 20px;
+  }
+
+  li {
+    margin-bottom: 6px;
+  }
 `;
 
-function CategoriasPage() {
+export default function CategoriasPage() {
   const [categorias, setCategorias] = useState([]);
+  const [gastosPorCategoria, setGastosPorCategoria] = useState({});
   const [abertos, setAbertos] = useState({});
   const [contentHeights, setContentHeights] = useState({});
   const [error, setError] = useState(null);
   const detalhesRefs = useRef({});
   const token = localStorage.getItem("token");
 
+  // Pega as categorias
   useEffect(() => {
     if (!token) {
       setError("Usuário não autenticado.");
@@ -85,9 +101,7 @@ function CategoriasPage() {
     }
 
     fetch("http://localhost:5000/api/categorias", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => {
         if (!res.ok) throw new Error("Erro ao carregar categorias");
@@ -103,6 +117,7 @@ function CategoriasPage() {
       });
   }, [token]);
 
+  // Calcula a altura dos detalhes
   useEffect(() => {
     const heights = {};
     categorias.forEach(cat => {
@@ -112,10 +127,28 @@ function CategoriasPage() {
       }
     });
     setContentHeights(heights);
-  }, [categorias]);
+  }, [categorias, gastosPorCategoria]);
 
   const toggleAberto = (id) => {
-    setAbertos(prev => ({ ...prev, [id]: !prev[id] }));
+    const novoAberto = !abertos[id];
+    setAbertos(prev => ({ ...prev, [id]: novoAberto }));
+
+    if (novoAberto && !gastosPorCategoria[id]) {
+      fetch(`http://localhost:5000/api/categorias/${id}/gastos`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then(res => {
+          if (!res.ok) throw new Error("Erro ao carregar gastos da categoria");
+          return res.json();
+        })
+        .then(data => {
+          setGastosPorCategoria(prev => ({ ...prev, [id]: data }));
+        })
+        .catch(err => {
+          console.error(err);
+          setGastosPorCategoria(prev => ({ ...prev, [id]: [] }));
+        });
+    }
   };
 
   return (
@@ -123,22 +156,35 @@ function CategoriasPage() {
       <Sidebar />
       <ContentWrapper>
         <Title>Categorias</Title>
-        {error && <p style={{color: "red"}}>{error}</p>}
+        {error && <p style={{ color: "red" }}>{error}</p>}
         {!error && categorias.length === 0 && <p>Nenhuma categoria encontrada.</p>}
         {categorias.map(cat => (
           <CategoriaItem key={cat.id} onClick={() => toggleAberto(cat.id)}>
             <Header>
               <CategoriaNome>{cat.nome}</CategoriaNome>
-              <Setinha aberto={abertos[cat.id]}>▼</Setinha>
+              <Setinha aberto={abertos[cat.id]}>▲</Setinha>
             </Header>
-            <TotalGasto>Total gasto: R$ {parseFloat(cat.totalGasto || 0).toFixed(2)}</TotalGasto>
+            <TotalGasto>
+              Total gasto: R$ {parseFloat(cat.totalGasto || 0).toFixed(2)} / Limite: R$ {parseFloat(cat.limite).toFixed(2)}
+            </TotalGasto>
             <DetalhesWrapper aberto={abertos[cat.id]} contentHeight={contentHeights[cat.id] || 0}>
               <DetalhesContent ref={el => (detalhesRefs.current[cat.id] = el)}>
-                <p>Detalhes dos gastos da categoria {cat.nome}:</p>
+                <p>Detalhes dos gastos da categoria:</p>
                 <ul>
-                  <li>Compra 1 - R$ 50.00</li>
-                  <li>Compra 2 - R$ 30.00</li>
-                  <li>Compra 3 - R$ 20.00</li>
+                  {gastosPorCategoria[cat.id] ? (
+                    gastosPorCategoria[cat.id].length > 0 ? (
+                      gastosPorCategoria[cat.id].map((gasto, index) => (
+                        <li key={index}>
+                          {gasto.descricao} - R$ {parseFloat(gasto.valor).toFixed(2)} em{" "}
+                          {new Date(gasto.data_compra).toLocaleDateString("pt-BR")}
+                        </li>
+                      ))
+                    ) : (
+                      <li>Nenhum gasto registrado.</li>
+                    )
+                  ) : (
+                    <li>Carregando...</li>
+                  )}
                 </ul>
               </DetalhesContent>
             </DetalhesWrapper>
@@ -148,5 +194,3 @@ function CategoriasPage() {
     </Container>
   );
 }
-
-export default CategoriasPage;
