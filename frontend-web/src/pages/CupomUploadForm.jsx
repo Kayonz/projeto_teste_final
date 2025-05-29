@@ -89,6 +89,13 @@ const ErrorText = styled.p`
   margin-top: 1rem;
 `;
 
+const SuccessText = styled.p`
+  color: green;
+  margin-top: 1rem;
+  font-weight: bold;
+  text-align: center;
+`;
+
 const ResultSection = styled.div`
   margin-top: 1.5rem;
 `;
@@ -107,6 +114,7 @@ const CupomUploadForm = ({ onGastosAtualizados }) => {
   const [loading, setLoading] = useState(false);
   const [resultado, setResultado] = useState(null);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   const navigate = useNavigate();
 
@@ -117,10 +125,12 @@ const CupomUploadForm = ({ onGastosAtualizados }) => {
         const res = await fetch("http://localhost:5000/api/categorias", {
           headers: { Authorization: `Bearer ${token}` },
         });
+        if (!res.ok) throw new Error("Erro ao buscar categorias");
         const data = await res.json();
         setCategorias(data);
       } catch (err) {
         console.error("Erro ao buscar categorias", err);
+        setError("Erro ao carregar categorias");
       }
     };
 
@@ -131,25 +141,28 @@ const CupomUploadForm = ({ onGastosAtualizados }) => {
     setFile(e.target.files[0]);
     setResultado(null);
     setError(null);
+    setSuccess(null);
   };
 
   const handleUpload = async () => {
     if (!file || !categoriaSelecionada) {
       setError("Selecione uma categoria e um arquivo.");
+      setSuccess(null);
       return;
     }
 
     setLoading(true);
     setError(null);
+    setSuccess(null);
 
     try {
       const formData = new FormData();
       formData.append("imagem", file);
-      formData.append("categoriaId", categoriaSelecionada); // Enviando categoria selecionada
+      formData.append("categoriaId", categoriaSelecionada);
 
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://localhost:5000/api/cupom-upload", {
+      const res = await fetch("http://localhost:5000/api/cupom", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -166,6 +179,7 @@ const CupomUploadForm = ({ onGastosAtualizados }) => {
       }
 
       setResultado(data);
+      setSuccess("Cupom processado com sucesso!");
 
       if (typeof onGastosAtualizados === "function") {
         onGastosAtualizados();
@@ -173,9 +187,9 @@ const CupomUploadForm = ({ onGastosAtualizados }) => {
     } catch (err) {
       console.error(err);
       setError("Erro ao enviar o cupom");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -204,7 +218,7 @@ const CupomUploadForm = ({ onGastosAtualizados }) => {
 
           {file && <FileName>Arquivo: {file.name}</FileName>}
 
-          <Button onClick={handleUpload} disabled={loading || !file}>
+          <Button onClick={handleUpload} disabled={loading || !file || !categoriaSelecionada}>
             {loading ? "Processando..." : "Ler Cupom"}
           </Button>
 
@@ -213,6 +227,7 @@ const CupomUploadForm = ({ onGastosAtualizados }) => {
           </Button>
 
           {error && <ErrorText>{error}</ErrorText>}
+          {success && <SuccessText>{success}</SuccessText>}
 
           {resultado && resultado.produtos && (
             <ResultSection>
