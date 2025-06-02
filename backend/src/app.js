@@ -10,6 +10,7 @@ import categoriaRoutes from './routes/categoriaRoutes.js';
 import financeiroRoutes from './routes/financeiroRoutes.js';
 import orcamentoRoutes from './routes/orcamentoRoutes.js';
 import ocrRoutes from './routes/ocrRoutes.js';
+import gastosRoutes from './routes/gastosRoutes.js';
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use('/api/categorias', categoriaRoutes);
 app.use('/api/financeiro', financeiroRoutes);
 app.use('/api/orcamento', orcamentoRoutes);
 app.use('/api/cupom', ocrRoutes);
+app.use('/api', gastosRoutes);
 
 app.get('/', (req, res) => {
   res.send('API Finance funcionando!');
