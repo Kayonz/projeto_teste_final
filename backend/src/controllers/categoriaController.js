@@ -1,8 +1,8 @@
 import pool from '../config/database.js';
 
-// Pega todas as categorias do usuário logado
+
 export const getCategorias = async (req, res) => {
-  const userId = req.userId; // ou req.user.id, conforme seu middleware
+  const userId = req.userId; 
 
   try {
     const result = await pool.query(

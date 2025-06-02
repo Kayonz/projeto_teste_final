@@ -124,8 +124,12 @@ const LogoutWrapper = styled.div`
 `;
 
 function DashboardPage() {
-  const [resumo, setResumo] = useState({});
+  const [orcamento, setOrcamento] = useState(0);
+  const [gastos, setGastos] = useState(0);
+  const [saldo, setSaldo] = useState(0);
+  const [percentualGasto, setPercentualGasto] = useState(0);
   const [gastosPorCategoria, setGastosPorCategoria] = useState([]);
+
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
@@ -135,17 +139,35 @@ function DashboardPage() {
       return;
     }
 
-    fetchResumoFinanceiro();
+    fetchDados();
     fetchGastosPorCategoria();
   }, [token]);
 
-  const fetchResumoFinanceiro = () => {
-    fetch("http://localhost:5000/api/resumo-financeiro", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => setResumo(data))
-      .catch((err) => console.error(err));
+  const fetchDados = async () => {
+    try {
+      const orcamentoRes = await fetch("http://localhost:5000/api/orcamento", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const orcamentoData = await orcamentoRes.json();
+      const orc = parseFloat(orcamentoData.orcamento) || 0;
+      setOrcamento(orc);
+
+      const gastosRes = await fetch("http://localhost:5000/api/gastos-por-categoria", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const gastosData = await gastosRes.json();
+      const totalGastos = gastosData.reduce((sum, item) => sum + parseFloat(item.valor), 0);
+
+      setGastos(totalGastos);
+
+      const saldoAtual = orc - totalGastos;
+      setSaldo(saldoAtual >= 0 ? saldoAtual : 0);
+
+      const percentual = orc > 0 ? ((totalGastos / orc) * 100).toFixed(2) : 0;
+      setPercentualGasto(percentual);
+    } catch (error) {
+      console.error("Erro ao buscar dados:", error);
+    }
   };
 
   const fetchGastosPorCategoria = () => {
@@ -163,13 +185,11 @@ function DashboardPage() {
   };
 
   const handleSetOrcamento = () => {
-    const valor = prompt("Digite o valor a adicionar ao orçamento:");
+    const valor = prompt("Digite o valor total do orçamento:");
     if (!valor || isNaN(valor)) {
       alert("Valor inválido!");
       return;
     }
-
-    const novoOrcamento = resumo.orcamento + parseFloat(valor);
 
     fetch("http://localhost:5000/api/orcamento", {
       method: "POST",
@@ -177,12 +197,12 @@ function DashboardPage() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ valor: novoOrcamento }),
+      body: JSON.stringify({ valor: parseFloat(valor) }),
     })
       .then((res) => res.json())
       .then(() => {
         alert("Orçamento atualizado!");
-        fetchResumoFinanceiro();
+        fetchDados();
       })
       .catch((err) => console.error(err));
   };
@@ -204,25 +224,25 @@ function DashboardPage() {
         <Cards>
           <Card>
             <CardTitle>Saldo Disponível</CardTitle>
-            <CardValue>R$ {(resumo.saldo || 0).toFixed(2)}</CardValue>
+            <CardValue>R$ {(saldo ?? 0).toFixed(2)}</CardValue>
           </Card>
           <Card>
             <CardTitle>Gastos do mês</CardTitle>
-            <CardValue>R$ {(resumo.gastos || 0).toFixed(2)}</CardValue>
+            <CardValue>R$ {(gastos ?? 0).toFixed(2)}</CardValue>
           </Card>
           <Card>
             <CardTitle>Orçamento Total</CardTitle>
-            <CardValue>R$ {(resumo.orcamento || 0).toFixed(2)}</CardValue>
+            <CardValue>R$ {(orcamento ?? 0).toFixed(2)}</CardValue>
           </Card>
           <Card>
             <CardTitle>Percentual Gasto</CardTitle>
-            <CardValue>{resumo.percentualGasto || 0}%</CardValue>
+            <CardValue>{(percentualGasto ?? 0)}%</CardValue>
           </Card>
         </Cards>
 
         <Actions>
           <ActionButton onClick={handleOpenCupom}>+ Ler Cupom Fiscal</ActionButton>
-          <ActionButton onClick={handleSetOrcamento}>+ Adicionar ao Orçamento</ActionButton>
+          <ActionButton onClick={handleSetOrcamento}>+ Definir Orçamento</ActionButton>
         </Actions>
 
         <h2 style={{ marginTop: "40px", color: "#3f4872" }}>Gastos por Categoria</h2>
