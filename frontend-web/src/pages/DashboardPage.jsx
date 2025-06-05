@@ -251,7 +251,7 @@ function DashboardPage() {
             <PieChart>
               <Pie
                 data={gastosPorCategoria}
-                dataKey="valor"
+                dataKey="valores"
                 nameKey="categoria"
                 cx="50%"
                 cy="50%"
