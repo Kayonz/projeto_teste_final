@@ -61,7 +61,7 @@ const CardValue = styled.p`
 `;
 
 const LogoutButton = styled.button`
-  background-color: rgb(74, 9, 179);
+  background-color: #6a0099;
   color: white;
   padding: 10px 16px;
   border: none;
@@ -90,7 +90,7 @@ const Actions = styled.div`
 
 const ActionButton = styled.button`
   padding: 12px 24px;
-  background-color: #3f4872;
+  background-color: #413b6b;
   color: white;
   border: none;
   border-radius: 8px;
@@ -99,7 +99,7 @@ const ActionButton = styled.button`
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: #505c8c;
+    background-color: #301c41;
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
   }

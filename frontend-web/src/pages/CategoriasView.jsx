@@ -165,7 +165,7 @@ export default function CategoriasPage() {
               <Setinha aberto={abertos[cat.id]}>▲</Setinha>
             </Header>
             <TotalGasto>
-              Total gasto: R$ {parseFloat(cat.totalGasto || 0).toFixed(2)} / Limite: R$ {parseFloat(cat.limite).toFixed(2)}
+              Total gasto: R$ {parseFloat(cat.totalGasto || 0).toFixed(2)} /
             </TotalGasto>
             <DetalhesWrapper aberto={abertos[cat.id]} contentHeight={contentHeights[cat.id] || 0}>
               <DetalhesContent ref={el => (detalhesRefs.current[cat.id] = el)}>

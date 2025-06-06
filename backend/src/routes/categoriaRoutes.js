@@ -7,5 +7,6 @@ const router = express.Router();
 router.get('/', verifyToken, getCategorias);
 router.put('/:id', verifyToken, updateCategoria);
 router.get('/:id/gastos', verifyToken, getGastosPorCategoria);
+router.get('/resumo-gastos-por-categoria', getResumoGastosPorCategoria);
 
 export default router;

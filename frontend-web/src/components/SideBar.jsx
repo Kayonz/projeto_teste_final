@@ -13,7 +13,7 @@ const SidebarContainer = styled.div`
   display: flex;
   flex-direction: column;
   transition: width 0.3s ease;
-  position: absolute; /* era fixed */
+  position: fixed; /* 🔥 Aqui é a correção */
   top: 0;
   left: 0;
   z-index: 1000;
@@ -71,12 +71,7 @@ function Sidebar({ onLogout }) {
         <FaCamera />
         <span>Ler Cupom Fiscal</span>
       </MenuItem>
-
-      <MenuItem isOpen={isOpen} onClick={() => navigate("/orcamento")}>
-        <FaMoneyBillWave />
-        <span>Orçamento</span>
-      </MenuItem>
-
+      
       <MenuItem isOpen={isOpen} onClick={() => navigate("/categorias")}>
        <MdCategory />
        <span>Categorias</span>
