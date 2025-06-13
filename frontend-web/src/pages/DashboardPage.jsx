@@ -187,32 +187,31 @@ function DashboardPage() {
     fetchGastosPorCategoria();
   }, [token]);
 
-  const fetchDados = async () => {
-    try {
-      const orcamentoRes = await fetch("http://localhost:5000/api/orcamento", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const orcamentoData = await orcamentoRes.json();
-      const orc = parseFloat(orcamentoData.orcamento) || 0;
-      setOrcamento(orc);
+const fetchDados = async () => {
+  try {
+    const orcamentoRes = await fetch("http://localhost:5000/api/orcamento", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const orcamentoData = await orcamentoRes.json();
+    const orc = parseFloat(orcamentoData.orcamento) || 0;
+    setOrcamento(orc);
 
-      const gastosRes = await fetch("http://localhost:5000/api/gastos-por-categoria", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const gastosData = await gastosRes.json();
-      const totalGastos = gastosData.reduce((sum, item) => sum + parseFloat(item.valor), 0);
-      setGastos(totalGastos);
+    const gastosRes = await fetch("http://localhost:5000/api/gastos-por-categoria", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const gastosData = await gastosRes.json();
+    const totalGastos = gastosData.reduce((sum, item) => sum + parseFloat(item.valor), 0);
+    setGastos(totalGastos);
 
-      const saldoAtual = orc - totalGastos;
-      setSaldo(saldoAtual >= 0 ? saldoAtual : 0);
+    const saldoAtual = orc - totalGastos;
+    setSaldo(Math.max(saldoAtual, 0)); // 👈 impede saldo negativo
 
-      const percentual = orc > 0 ? ((totalGastos / orc) * 100).toFixed(2) : 0;
-      setPercentualGasto(percentual);
-    } catch (error) {
-      console.error("Erro ao buscar dados:", error);
-    }
-  };
-
+    const percentual = orc > 0 ? ((totalGastos / orc) * 100).toFixed(2) : 0;
+    setPercentualGasto(percentual);
+  } catch (error) {
+    console.error("Erro ao buscar dados:", error);
+  }
+};
   const fetchGastosPorCategoria = () => {
     fetch("http://localhost:5000/api/gastos-por-categoria", {
       headers: { Authorization: `Bearer ${token}` },
@@ -262,20 +261,22 @@ function DashboardPage() {
   const handleZerarOrcamento = () => setShowConfirmZerar(true);
 
   const handleConfirmZerar = () => {
-    fetch("http://localhost:5000/api/orcamento/zerar", {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+  fetch("http://localhost:5000/api/orcamento/zerar", {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then((res) => res.json())
+    .then(() => {
+      setShowConfirmZerar(false);
+      // Zerar também os valores localmente
+      setOrcamento(0);
+      setSaldo(0);
+      setPercentualGasto(0);
     })
-      .then((res) => res.json())
-      .then(() => {
-        setShowConfirmZerar(false);
-        fetchDados();
-      })
-      .catch((err) => console.error(err));
-  };
-
+    .catch((err) => console.error(err));
+};
   const handleOpenCupom = () => navigate("/cupom");
 
   return (
