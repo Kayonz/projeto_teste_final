@@ -16,7 +16,14 @@ import {
   Legend,
 } from "recharts";
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#845EC2", "#D65DB1"];
+const COLORS = [
+  "#7F00FF", // Roxo neon
+  "#00C9A7", // Verde piscina
+  "#FF5F6D", // Coral neon
+  "#FFD166", // Amarelo pastel
+  "#4ECDC4", // Azul água
+  "#C06C84", // Rosa queimado
+];
 
 const Container = styled.div`
   width: 100vw;
@@ -294,28 +301,36 @@ function DashboardPage() {
           <ActionButton onClick={handleZerarOrcamento}>Zerar Orçamento</ActionButton>
         </Actions>
 
-        <h2 style={{ marginTop: "40px", color: "#3f4872" }}>Gastos por Categoria</h2>
-        <div style={{ width: "100%", height: 300 }}>
-          <ResponsiveContainer>
-            <PieChart>
-              <Pie
-                data={gastosPorCategoria}
-                dataKey="valor"
-                nameKey="categoria"
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
-                label
-              >
-                {gastosPorCategoria.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+        <h2 style={{ marginTop: "40px", color: "#3f4872" }}>Gasto por Categoria</h2>
+          <div style={{ width: "100%", height: 300 }}>
+            <ResponsiveContainer>
+              <PieChart>
+                <Pie
+                  data={gastosPorCategoria.reduce((acc, item) => {
+                    const found = acc.find(c => c.categoria === item.categoria);
+                    if (found) {
+                      found.valor += item.valor;
+                    } else {
+                      acc.push({ ...item });
+                    }
+                    return acc;
+                  }, [])}
+                  dataKey="valor"
+                  nameKey="categoria"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  label
+                >
+                  {gastosPorCategoria.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
 
         <h2 style={{ marginTop: "40px", color: "#3f4872" }}>Histórico de Gastos</h2>
         <div style={{ width: "100%", height: 300 }}>
