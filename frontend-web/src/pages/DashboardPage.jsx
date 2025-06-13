@@ -22,10 +22,7 @@ const Container = styled.div`
   width: 100vw;
   height: 100vh;
   background-color: #eff0f9;
-  padding: 0;
   font-family: "Montserrat", sans-serif;
-  box-sizing: border-box;
-  position: relative;
   overflow-y: auto;
 `;
 
@@ -68,12 +65,10 @@ const LogoutButton = styled.button`
   border-radius: 8px;
   font-weight: bold;
   cursor: pointer;
-  transition: all 0.2s ease;
 
   &:hover {
     background-color: rgb(64, 5, 153);
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
   }
 
   &:active {
@@ -96,12 +91,10 @@ const ActionButton = styled.button`
   border-radius: 8px;
   font-weight: bold;
   cursor: pointer;
-  transition: all 0.2s ease;
 
   &:hover {
     background-color: #505c8c;
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
   }
 
   &:active {
@@ -120,7 +113,48 @@ const LogoutWrapper = styled.div`
   position: absolute;
   top: 20px;
   right: 20px;
-  z-index: 10;
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: ${({ show }) => (show ? "flex" : "none")};
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+`;
+
+const Modal = styled.div`
+  background-color: white;
+  padding: 30px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+`;
+
+const ModalTitle = styled.h2`
+  margin-bottom: 20px;
+  color: #25267e;
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+`;
+
+const ModalActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 `;
 
 function DashboardPage() {
@@ -129,6 +163,9 @@ function DashboardPage() {
   const [saldo, setSaldo] = useState(0);
   const [percentualGasto, setPercentualGasto] = useState(0);
   const [gastosPorCategoria, setGastosPorCategoria] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [novoOrcamento, setNovoOrcamento] = useState("");
+  const [showConfirmZerar, setShowConfirmZerar] = useState(false);
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -157,7 +194,6 @@ function DashboardPage() {
       });
       const gastosData = await gastosRes.json();
       const totalGastos = gastosData.reduce((sum, item) => sum + parseFloat(item.valor), 0);
-
       setGastos(totalGastos);
 
       const saldoAtual = orc - totalGastos;
@@ -175,7 +211,13 @@ function DashboardPage() {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
-      .then((data) => setGastosPorCategoria(data))
+      .then((data) => {
+        const parsedData = data.map(item => ({
+          ...item,
+          valor: Number(item.valor),
+        }));
+        setGastosPorCategoria(parsedData);
+      })
       .catch((err) => console.error(err));
   };
 
@@ -184,10 +226,12 @@ function DashboardPage() {
     navigate("/login");
   };
 
-  const handleSetOrcamento = () => {
-    const valor = prompt("Digite o valor total do orçamento:");
-    if (!valor || isNaN(valor)) {
-      alert("Valor inválido!");
+  const handleSetOrcamento = () => setShowModal(true);
+
+  const handleConfirmOrcamento = () => {
+    const valor = parseFloat(novoOrcamento);
+    if (isNaN(valor)) {
+      alert("Digite um valor válido.");
       return;
     }
 
@@ -197,23 +241,39 @@ function DashboardPage() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ valor: parseFloat(valor) }),
+      body: JSON.stringify({ valor }),
     })
       .then((res) => res.json())
       .then(() => {
-        alert("Orçamento atualizado!");
+        setShowModal(false);
+        setNovoOrcamento("");
         fetchDados();
       })
       .catch((err) => console.error(err));
   };
 
-  const handleOpenCupom = () => {
-    navigate("/cupom");
+  const handleZerarOrcamento = () => setShowConfirmZerar(true);
+
+  const handleConfirmZerar = () => {
+    fetch("http://localhost:5000/api/orcamento/zerar", {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then(() => {
+        setShowConfirmZerar(false);
+        fetchDados();
+      })
+      .catch((err) => console.error(err));
   };
+
+  const handleOpenCupom = () => navigate("/cupom");
 
   return (
     <Container>
-      <Sidebar onLogout={handleLogout} onNavigate={() => {}} />
+      <Sidebar onLogout={handleLogout} />
       <ContentWrapper>
         <LogoutWrapper>
           <LogoutButton onClick={handleLogout}>Fazer Logout</LogoutButton>
@@ -222,27 +282,16 @@ function DashboardPage() {
         <Title>Dashboard Financeiro</Title>
 
         <Cards>
-          <Card>
-            <CardTitle>Saldo Disponível</CardTitle>
-            <CardValue>R$ {(saldo ?? 0).toFixed(2)}</CardValue>
-          </Card>
-          <Card>
-            <CardTitle>Gastos do mês</CardTitle>
-            <CardValue>R$ {(gastos ?? 0).toFixed(2)}</CardValue>
-          </Card>
-          <Card>
-            <CardTitle>Orçamento Total</CardTitle>
-            <CardValue>R$ {(orcamento ?? 0).toFixed(2)}</CardValue>
-          </Card>
-          <Card>
-            <CardTitle>Percentual Gasto</CardTitle>
-            <CardValue>{(percentualGasto ?? 0)}%</CardValue>
-          </Card>
+          <Card><CardTitle>Saldo Disponível</CardTitle><CardValue>R$ {saldo.toFixed(2)}</CardValue></Card>
+          <Card><CardTitle>Gastos do mês</CardTitle><CardValue>R$ {gastos.toFixed(2)}</CardValue></Card>
+          <Card><CardTitle>Orçamento Total</CardTitle><CardValue>R$ {orcamento.toFixed(2)}</CardValue></Card>
+          <Card><CardTitle>Percentual Gasto</CardTitle><CardValue>{percentualGasto}%</CardValue></Card>
         </Cards>
 
         <Actions>
           <ActionButton onClick={handleOpenCupom}>+ Ler Cupom Fiscal</ActionButton>
           <ActionButton onClick={handleSetOrcamento}>+ Definir Orçamento</ActionButton>
+          <ActionButton onClick={handleZerarOrcamento}>Zerar Orçamento</ActionButton>
         </Actions>
 
         <h2 style={{ marginTop: "40px", color: "#3f4872" }}>Gastos por Categoria</h2>
@@ -251,7 +300,7 @@ function DashboardPage() {
             <PieChart>
               <Pie
                 data={gastosPorCategoria}
-                dataKey="valores"
+                dataKey="valor"
                 nameKey="categoria"
                 cx="50%"
                 cy="50%"
@@ -282,6 +331,34 @@ function DashboardPage() {
           </ResponsiveContainer>
         </div>
       </ContentWrapper>
+
+      {/* Modal Definir Orçamento */}
+      <ModalOverlay show={showModal}>
+        <Modal>
+          <ModalTitle>Definir Orçamento</ModalTitle>
+          <Input
+            type="number"
+            placeholder="Digite o valor"
+            value={novoOrcamento}
+            onChange={(e) => setNovoOrcamento(e.target.value)}
+          />
+          <ModalActions>
+            <ActionButton onClick={() => setShowModal(false)}>Cancelar</ActionButton>
+            <ActionButton onClick={handleConfirmOrcamento}>Salvar</ActionButton>
+          </ModalActions>
+        </Modal>
+      </ModalOverlay>
+
+      {/* Modal Confirmar Zerar */}
+      <ModalOverlay show={showConfirmZerar}>
+        <Modal>
+          <ModalTitle>Tem certeza que deseja zerar o orçamento?</ModalTitle>
+          <ModalActions>
+            <ActionButton onClick={() => setShowConfirmZerar(false)}>Cancelar</ActionButton>
+            <ActionButton onClick={handleConfirmZerar}>Confirmar</ActionButton>
+          </ModalActions>
+        </Modal>
+      </ModalOverlay>
     </Container>
   );
 }

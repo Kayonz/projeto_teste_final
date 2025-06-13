@@ -31,6 +31,9 @@ app.use('/api/financeiro', financeiroRoutes);
 app.use('/api/orcamento', orcamentoRoutes);
 app.use('/api/cupom', ocrRoutes);
 app.use('/api', gastosRoutes);
+app.use('/api/gastos-por-categoria', gastosRoutes);
+app.use('/api/gastos-agrupados', gastosRoutes);;
+app.use('api/orcamento/zerar', orcamentoRoutes); // Corrigido o caminho para 'orcamento' ao invés de 'zerarOrcamento'
 
 app.get('/', (req, res) => {
   res.send('API Finance funcionando!');

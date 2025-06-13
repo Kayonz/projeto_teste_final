@@ -1,6 +1,5 @@
 import pool from '../config/database.js';
 
-
 export const getCategorias = async (req, res) => {
   const userId = req.userId; 
 
@@ -16,7 +15,7 @@ export const getCategorias = async (req, res) => {
   }
 };
 
-// Atualiza limite da categoria
+
 export const updateCategoria = async (req, res) => {
   try {
     const userId = req.userId;
