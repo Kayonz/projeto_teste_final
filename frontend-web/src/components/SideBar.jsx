@@ -1,9 +1,10 @@
 import { useState } from "react";
 import styled from "styled-components";
-import { FaHome, FaMoneyBillWave, FaChartPie, FaSignOutAlt, FaBars, FaCamera } from "react-icons/fa";
+import { FaChartPie, FaSignOutAlt, FaBars, FaCamera } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
 import { MdCategory } from "react-icons/md";
 import { Link, useNavigate } from "react-router-dom";
+import { AiFillSignal } from "react-icons/ai";
 
 const SidebarContainer = styled.div`
   height: 100vh;
@@ -74,6 +75,11 @@ function Sidebar({ onLogout }) {
       <MenuItem isOpen={isOpen} onClick={() => navigate("/categorias")}>
        <MdCategory />
        <span>Categorias</span>
+      </MenuItem>
+
+      <MenuItem isOpen={isOpen} onClick={() => navigate("/metricas")}>
+       <AiFillSignal />
+       <span>Métricas</span>
       </MenuItem>
 
       <Link to="/perfil" style={{ textDecoration: "none", color: "inherit" }}>

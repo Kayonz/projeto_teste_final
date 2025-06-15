@@ -4,6 +4,7 @@ import DashboardPage from "./pages/DashboardPage";
 import CategoriasView from "./pages/CategoriasView";
 import LoginRegisterPage from "./pages/LoginRegisterPage";
 import PerfilPage from "./pages/PerfilPage";
+import MetricasPage from "./pages/MetricasPage";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/perfil" element={<PerfilPage />} />
         <Route path="/cupom" element={<CupomUploadForm />} />
         <Route path="*" element={<Navigate to="/dashboard" />} />
+        <Route path="/metricas" element={<MetricasPage />} />
       </Routes>
     </Router>
   );
