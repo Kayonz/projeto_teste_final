@@ -58,7 +58,7 @@ export const getGastosPorCategoria = async (req, res) => {
   }
 };
 
-// 🔸 🔥 Retorna o resumo dos gastos por categoria (ideal para gráficos)
+
 export const getResumoGastosPorCategoria = async (req, res) => {
   try {
     const userId = req.userId;
