@@ -11,7 +11,7 @@ import financeiroRoutes from './routes/financeiroRoutes.js';
 import orcamentoRoutes from './routes/orcamentoRoutes.js';
 import ocrRoutes from './routes/ocrRoutes.js';
 import gastosRoutes from './routes/gastosRoutes.js';
-
+import metricasRoutes from './routes/metricasRoutes.js';
 
 dotenv.config();
 

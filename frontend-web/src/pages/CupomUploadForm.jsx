@@ -18,6 +18,7 @@ const MainContent = styled.div`
   justify-content: center;
   align-items: center;
   width: 100%;
+  overflow-y: auto;
 `;
 
 const Card = styled.div`
@@ -27,6 +28,12 @@ const Card = styled.div`
   box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 600px;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem 1rem;
+    margin: 0 1rem;
+    box-shadow: none;
+  }
 `;
 
 const Title = styled.h2`
@@ -53,6 +60,7 @@ const Button = styled.button`
   border-radius: 6px;
   cursor: pointer;
   width: 100%;
+  margin-top: 10px;
 
   &:disabled {
     background-color: #aaa;
@@ -87,6 +95,7 @@ const HiddenInput = styled.input`
 const ErrorText = styled.p`
   color: red;
   margin-top: 1rem;
+  text-align: center;
 `;
 
 const SuccessText = styled.p`
@@ -213,7 +222,11 @@ const CupomUploadForm = ({ onGastosAtualizados }) => {
 
           <FileInputWrapper>
             {file ? file.name : "Selecionar Arquivo"}
-            <HiddenInput type="file" onChange={handleFileChange} />
+            <HiddenInput
+              type="file"
+              accept="image/png, image/jpeg"
+              onChange={handleFileChange}
+            />
           </FileInputWrapper>
 
           {file && <FileName>Arquivo: {file.name}</FileName>}
@@ -222,7 +235,7 @@ const CupomUploadForm = ({ onGastosAtualizados }) => {
             {loading ? "Processando..." : "Ler Cupom"}
           </Button>
 
-          <Button onClick={() => navigate("/categorias")} style={{ marginTop: "10px" }}>
+          <Button onClick={() => navigate("/categorias")}>
             Ver Categorias
           </Button>
 

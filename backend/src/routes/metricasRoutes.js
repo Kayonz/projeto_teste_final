@@ -1,9 +1,9 @@
 import express from 'express';
-import { getMetricasFinanceiras } from './controllers/metricasController.js';
-import authMiddleware from './middlewares/authMiddleware.js';
+import { getMetricasFinanceiras } from '../controllers/metricasController.js';
+import { verifyToken } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/api/metricas', authMiddleware, getMetricasFinanceiras);
+router.get('/api/metricas', verifyToken, getMetricasFinanceiras);
 
 export default router;
