@@ -1,8 +1,10 @@
-Para iniciar o React 
+Para iniciar o projeto comece instalando as dependências:
+
+cd frontend
+
+npm install react
+
+Assim que instalar as dependências, rode no frontend:
 
 npm start
 
-para o back 
-node src/app.js
-
-Utilizando futuramente tesseract.js

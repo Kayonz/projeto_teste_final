@@ -1,7 +1,8 @@
 import pool from '../config/database.js';
 
+
 export const getCategorias = async (req, res) => {
-  const userId = req.userId; 
+  const userId = req.userId;
 
   try {
     const result = await pool.query(
@@ -14,8 +15,6 @@ export const getCategorias = async (req, res) => {
     res.status(500).json({ message: 'Erro ao buscar categorias' });
   }
 };
-
-
 export const updateCategoria = async (req, res) => {
   try {
     const userId = req.userId;
@@ -33,12 +32,12 @@ export const updateCategoria = async (req, res) => {
 
     res.json(result.rows[0]);
   } catch (error) {
-    console.error(error);
+    console.error('Erro ao atualizar categoria:', error);
     res.status(500).json({ error: 'Erro ao atualizar categoria' });
   }
 };
 
-// Pega os gastos de uma categoria específica para o usuário logado
+// 🔸 Lista os gastos de uma categoria específica
 export const getGastosPorCategoria = async (req, res) => {
   try {
     const userId = req.userId;
@@ -54,7 +53,35 @@ export const getGastosPorCategoria = async (req, res) => {
 
     res.json(result.rows);
   } catch (error) {
-    console.error(error);
+    console.error('Erro ao buscar gastos por categoria:', error);
     res.status(500).json({ error: 'Erro ao buscar gastos por categoria' });
+  }
+};
+
+// 🔸 🔥 Retorna o resumo dos gastos por categoria (ideal para gráficos)
+export const getResumoGastosPorCategoria = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const result = await pool.query(
+      `
+      SELECT 
+        c.id as categoria_id,
+        c.nome as categoria,
+        COALESCE(SUM(g.valor), 0) as total_gasto
+      FROM categorias c
+      LEFT JOIN gastos g 
+        ON g.categoria_id = c.id AND g.usuario_id = $1
+      WHERE c.usuario_id = $1
+      GROUP BY c.id, c.nome
+      ORDER BY c.nome;
+      `,
+      [userId]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Erro ao buscar resumo de gastos por categoria:', error);
+    res.status(500).json({ error: 'Erro ao buscar resumo de gastos por categoria' });
   }
 };

@@ -7,16 +7,14 @@ export const registerUser = async (req, res) => {
   const { nome, email, senha } = req.body;
 
   try {
-    // Verifica se já existe usuário com email
+
     const exist = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
     if (exist.rows.length > 0) {
       return res.status(400).json({ message: 'Email já cadastrado' });
     }
 
-    // Hash da senha
     const hashedSenha = await bcrypt.hash(senha, 10);
 
-    // Insere usuário no banco
     const result = await pool.query(
       'INSERT INTO users (nome, email, senha) VALUES ($1, $2, $3) RETURNING id, nome, email, foto_url',
       [nome, email, hashedSenha]
