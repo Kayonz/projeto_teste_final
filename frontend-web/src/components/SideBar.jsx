@@ -54,7 +54,7 @@ const MenuItem = styled.div`
 
 function Sidebar({ onLogout }) {
   const [isOpen, setIsOpen] = useState(true);
-  const navigate = useNavigate();s
+  const navigate = useNavigate();
 
   return (
     <SidebarContainer isOpen={isOpen}>
