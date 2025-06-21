@@ -60,12 +60,12 @@ const Setinha = styled.span`
   font-size: 18px;
   transition: transform 0.2s ease;
   user-select: none;
-  transform: rotate(${props => (props.aberto ? "180deg" : "0deg")});
+  transform: rotate(${(props) => (props.aberto ? "180deg" : "0deg")});
 `;
 
 const DetalhesWrapper = styled.div`
   overflow: hidden;
-  max-height: ${props => (props.aberto ? `${props.contentHeight}px` : "0")};
+  max-height: ${(props) => (props.aberto ? `${props.contentHeight}px` : "0")};
   transition: max-height 0.3s ease;
 `;
 
@@ -93,7 +93,7 @@ export default function CategoriasPage() {
   const detalhesRefs = useRef({});
   const token = localStorage.getItem("token");
 
-  // Pega as categorias
+  // Carrega categorias
   useEffect(() => {
     if (!token) {
       setError("Usuário não autenticado.");
@@ -103,50 +103,49 @@ export default function CategoriasPage() {
     fetch("http://localhost:5000/api/categorias", {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then(res => {
+      .then((res) => {
         if (!res.ok) throw new Error("Erro ao carregar categorias");
         return res.json();
       })
-      .then(data => {
+      .then((data) => {
         setCategorias(data);
         setError(null);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         setError("Não foi possível carregar as categorias.");
       });
   }, [token]);
 
-  // Calcula a altura dos detalhes
+  // Atualiza altura do detalhe para animação
   useEffect(() => {
     const heights = {};
-    categorias.forEach(cat => {
+    categorias.forEach((cat) => {
       const el = detalhesRefs.current[cat.id];
-      if (el) {
-        heights[cat.id] = el.scrollHeight;
-      }
+      if (el) heights[cat.id] = el.scrollHeight;
     });
     setContentHeights(heights);
   }, [categorias, gastosPorCategoria]);
 
+  // Alterna aberto/fechado e carrega gastos da categoria se abrir
   const toggleAberto = (id) => {
     const novoAberto = !abertos[id];
-    setAbertos(prev => ({ ...prev, [id]: novoAberto }));
+    setAbertos((prev) => ({ ...prev, [id]: novoAberto }));
 
     if (novoAberto && !gastosPorCategoria[id]) {
       fetch(`http://localhost:5000/api/categorias/${id}/gastos`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-        .then(res => {
+        .then((res) => {
           if (!res.ok) throw new Error("Erro ao carregar gastos da categoria");
           return res.json();
         })
-        .then(data => {
-          setGastosPorCategoria(prev => ({ ...prev, [id]: data }));
+        .then((data) => {
+          setGastosPorCategoria((prev) => ({ ...prev, [id]: data }));
         })
-        .catch(err => {
+        .catch((err) => {
           console.error(err);
-          setGastosPorCategoria(prev => ({ ...prev, [id]: [] }));
+          setGastosPorCategoria((prev) => ({ ...prev, [id]: [] }));
         });
     }
   };
@@ -158,38 +157,45 @@ export default function CategoriasPage() {
         <Title>Categorias</Title>
         {error && <p style={{ color: "red" }}>{error}</p>}
         {!error && categorias.length === 0 && <p>Nenhuma categoria encontrada.</p>}
-        {categorias.map(cat => (
-          <CategoriaItem key={cat.id} onClick={() => toggleAberto(cat.id)}>
-            <Header>
-              <CategoriaNome>{cat.nome}</CategoriaNome>
-              <Setinha aberto={abertos[cat.id]}>▲</Setinha>
-            </Header>
-            <TotalGasto>
-              Total gasto: R$ {parseFloat(cat.totalGasto || 0).toFixed(2)} /
-            </TotalGasto>
-            <DetalhesWrapper aberto={abertos[cat.id]} contentHeight={contentHeights[cat.id] || 0}>
-              <DetalhesContent ref={el => (detalhesRefs.current[cat.id] = el)}>
-                <p>Detalhes dos gastos da categoria:</p>
-                <ul>
-                  {gastosPorCategoria[cat.id] ? (
-                    gastosPorCategoria[cat.id].length > 0 ? (
-                      gastosPorCategoria[cat.id].map((gasto, index) => (
-                        <li key={index}>
-                          {gasto.descricao} - R$ {parseFloat(gasto.valor).toFixed(2)} em{" "}
-                          {new Date(gasto.data_compra).toLocaleDateString("pt-BR")}
-                        </li>
-                      ))
+        {categorias.map((cat) => {
+          const gastos = gastosPorCategoria[cat.id];
+          const totalGasto = gastos
+            ? gastos.reduce((acc, gasto) => acc + parseFloat(gasto.valor || 0), 0)
+            : 0;
+
+          return (
+            <CategoriaItem key={cat.id} onClick={() => toggleAberto(cat.id)}>
+              <Header>
+                <CategoriaNome>{cat.nome}</CategoriaNome>
+                <Setinha aberto={abertos[cat.id]}>▲</Setinha>
+              </Header>
+              <TotalGasto>
+                {gastos ? `Total gasto: R$ ${totalGasto.toFixed(2)}` : "Carregando total..."}
+              </TotalGasto>
+              <DetalhesWrapper aberto={abertos[cat.id]} contentHeight={contentHeights[cat.id] || 0}>
+                <DetalhesContent ref={(el) => (detalhesRefs.current[cat.id] = el)}>
+                  <p>Detalhes dos gastos da categoria:</p>
+                  <ul>
+                    {gastos ? (
+                      gastos.length > 0 ? (
+                        gastos.map((gasto, index) => (
+                          <li key={index}>
+                            {gasto.descricao} - R$ {parseFloat(gasto.valor).toFixed(2)} em{" "}
+                            {new Date(gasto.data_compra).toLocaleDateString("pt-BR")}
+                          </li>
+                        ))
+                      ) : (
+                        <li>Nenhum gasto registrado.</li>
+                      )
                     ) : (
-                      <li>Nenhum gasto registrado.</li>
-                    )
-                  ) : (
-                    <li>Carregando...</li>
-                  )}
-                </ul>
-              </DetalhesContent>
-            </DetalhesWrapper>
-          </CategoriaItem>
-        ))}
+                      <li>Carregando...</li>
+                    )}
+                  </ul>
+                </DetalhesContent>
+              </DetalhesWrapper>
+            </CategoriaItem>
+          );
+        })}
       </ContentWrapper>
     </Container>
   );

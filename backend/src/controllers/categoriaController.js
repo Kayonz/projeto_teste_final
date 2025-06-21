@@ -1,6 +1,6 @@
 import pool from '../config/database.js';
 
-// 🔸 Lista categorias do usuário
+
 export const getCategorias = async (req, res) => {
   const userId = req.userId;
 
@@ -15,8 +15,6 @@ export const getCategorias = async (req, res) => {
     res.status(500).json({ message: 'Erro ao buscar categorias' });
   }
 };
-
-// 🔸 Atualiza limite da categoria
 export const updateCategoria = async (req, res) => {
   try {
     const userId = req.userId;

@@ -11,6 +11,7 @@ import financeiroRoutes from './routes/financeiroRoutes.js';
 import orcamentoRoutes from './routes/orcamentoRoutes.js';
 import ocrRoutes from './routes/ocrRoutes.js';
 import gastosRoutes from './routes/gastosRoutes.js';
+import metricasRoutes from './routes/metricasRoutes.js';
 
 dotenv.config();
 
@@ -31,6 +32,10 @@ app.use('/api/financeiro', financeiroRoutes);
 app.use('/api/orcamento', orcamentoRoutes);
 app.use('/api/cupom', ocrRoutes);
 app.use('/api', gastosRoutes);
+app.use('/api/gastos-por-categoria', gastosRoutes);
+app.use('/api/gastos-agrupados', gastosRoutes);;
+app.use('api/orcamento/zerar', orcamentoRoutes);
+app.use('/api/metricas', metricasRoutes);
 
 app.get('/', (req, res) => {
   res.send('API Finance funcionando!');

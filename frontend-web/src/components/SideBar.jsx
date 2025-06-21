@@ -1,9 +1,10 @@
 import { useState } from "react";
 import styled from "styled-components";
-import { FaHome, FaMoneyBillWave, FaChartPie, FaSignOutAlt, FaBars, FaCamera } from "react-icons/fa";
+import { FaChartPie, FaSignOutAlt, FaBars, FaCamera } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
 import { MdCategory } from "react-icons/md";
 import { Link, useNavigate } from "react-router-dom";
+import { AiFillSignal } from "react-icons/ai";
 
 const SidebarContainer = styled.div`
   height: 100vh;
@@ -19,7 +20,6 @@ const SidebarContainer = styled.div`
   z-index: 1000;
   box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3);
 `;
-
 const ToggleButton = styled.button`
   background: none;
   border: none;
@@ -54,7 +54,7 @@ const MenuItem = styled.div`
 
 function Sidebar({ onLogout }) {
   const [isOpen, setIsOpen] = useState(true);
-  const navigate = useNavigate();
+  const navigate = useNavigate();s
 
   return (
     <SidebarContainer isOpen={isOpen}>
@@ -71,10 +71,15 @@ function Sidebar({ onLogout }) {
         <FaCamera />
         <span>Ler Cupom Fiscal</span>
       </MenuItem>
-      
+
       <MenuItem isOpen={isOpen} onClick={() => navigate("/categorias")}>
        <MdCategory />
        <span>Categorias</span>
+      </MenuItem>
+
+      <MenuItem isOpen={isOpen} onClick={() => navigate("/metricas")}>
+       <AiFillSignal />
+       <span>Métricas</span>
       </MenuItem>
 
       <Link to="/perfil" style={{ textDecoration: "none", color: "inherit" }}>
